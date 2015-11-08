@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 
@@ -41,6 +42,9 @@ public class Simulator {
 	int d1 = 0;
 	
 	LinkedList writeBuffer = new LinkedList();//Stores the blocks that are going te be flushed back to memory
+	ArrayList processorsList = new ArrayList();
+	
+	Memory memory;
 	
 	public Simulator(int p,int n1,int n2 ,int b,int a1,int a2,int C,int d,int d1){
 		this.p=p;
@@ -53,9 +57,40 @@ public class Simulator {
 		this.d=d;
 		this.d1=d1;
 		initializeUnits();
+		simulate();
 	}
 	void initializeUnits(){
+		//Initialize processors===============================================================
 		
+		//the number of blocks in the l1=the size of l1/the size of a block
+		int numberOfBlocksInL1 = n1/b;
+		
+		//so the number of sets in the l1=the number of blocks in the l1/the associativity of l1
+		int numberOfSetInL1 = numberOfBlocksInL1/a1;
+		
+		//the number of blocks in the l1=the size of l1/the size of a block
+		int numberOfBlocksInL2 = n2/b;
+				
+		//so the number of sets in the l1=the number of blocks in the l1/the associativity of l1
+		int numberOfSetInL2 = numberOfBlocksInL2/a2;
+		
+		int base = 2;
+	    int processorsNumber = (int) Math.pow(base, this.p);
+	    for(int i=0;i<processorsNumber;i++){
+	    	Processor processor = new Processor(numberOfSetInL1,numberOfSetInL2,a1,a2);
+	    	processorsList.add(processor);
+	    }
+	    //Initialize memory===============================================================
+	    //TODO load benchmarks into memory
+	    String memoryDataFilePath = "";
+	    memory = Memory.getInstance(memoryDataFilePath);
+	    
+	}
+	void simulate(){
+		//Infinite loop(clock cycles)
+		while(true){
+			//TODO 
+		}
 	}
 	/**
 	 * @param args
