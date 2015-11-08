@@ -61,23 +61,32 @@ public class Simulator {
 	}
 	void initializeUnits(){
 		//Initialize processors===============================================================
-		
-		//the number of blocks in the l1=the size of l1/the size of a block
-		int numberOfBlocksInL1 = n1/b;
-		
-		//so the number of sets in the l1=the number of blocks in the l1/the associativity of l1
-		int numberOfSetInL1 = numberOfBlocksInL1/a1;
-		
-		//the number of blocks in the l1=the size of l1/the size of a block
-		int numberOfBlocksInL2 = n2/b;
-				
-		//so the number of sets in the l1=the number of blocks in the l1/the associativity of l1
-		int numberOfSetInL2 = numberOfBlocksInL2/a2;
-		
 		int base = 2;
+		//the size of l1
+		int sizeOfl1 = (int) Math.pow(base, n1);
+		//the number of blocks in the l1=the size of l1/the size of a block
+		int numberOfBlocksInL1 = sizeOfl1/b;
+		
+		//the the associativity of l1
+		int associativityOfL1 = (int) Math.pow(base, a1);
+		//so the number of sets in the l1=the number of blocks in the l1/the associativity of l1
+		int numberOfSetInL1 = numberOfBlocksInL1/associativityOfL1;
+		
+		
+		//the size of l1
+		int sizeOfl2 = (int) Math.pow(base, n2);
+		//the number of blocks in the l2=the size of l2/the size of a block
+		int numberOfBlocksInL2 = sizeOfl2/b;
+		
+		//the the associativity of l2
+	    int associativityOfL2 = (int) Math.pow(base, a2);
+		//so the number of sets in the l2=the number of blocks in the l2/the associativity of l2
+		int numberOfSetInL2 = numberOfBlocksInL2/associativityOfL2;
+		
+		
 	    int processorsNumber = (int) Math.pow(base, this.p);
 	    for(int i=0;i<processorsNumber;i++){
-	    	Processor processor = new Processor(numberOfSetInL1,numberOfSetInL2,a1,a2);
+	    	Processor processor = new Processor(numberOfSetInL1,numberOfSetInL2,associativityOfL1,a2);
 	    	processorsList.add(processor);
 	    }
 	    //Initialize memory===============================================================

@@ -5,10 +5,10 @@ import java.util.LinkedList;
  */
 public class L2 {
 	LinkedList setsList = new LinkedList();
-	L2(int numberOfSetInL2,int a2){
+	L2(int numberOfSetInL2,int associativity){
 		//Initialize the sets in the cache
 		for(int i=0;i<numberOfSetInL2;i++){
-			Set set = new Set(a2);
+			Set set = new Set(associativity);
 			setsList.add(set);
 		}
 	}
