@@ -45,6 +45,7 @@ public class Simulator {
 	ArrayList processorsList = new ArrayList();
 	
 	Memory memory;
+	MemoryController memoryController;
 	
 	public Simulator(int p,int n1,int n2 ,int b,int a1,int a2,int C,int d,int d1){
 		this.p=p;
