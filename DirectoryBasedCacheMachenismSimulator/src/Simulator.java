@@ -1,7 +1,10 @@
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-
+/*
+ * The simulator is trace driven. That is memory load and store operations will specified in an
+ * input trace file whose name is specified as the second command line input.
+ */
 public class Simulator {
 	
 	/*
@@ -45,6 +48,11 @@ public class Simulator {
 	ArrayList processorsList = new ArrayList();
 	
 	Memory memory;
+	/*
+	 * If a access to L2 is a miss, then it will require sending a message t on-chip memory controller which
+	 * is co-located with tile0, a memory access, which assumed to take d1 cycles(uniform memory access), and a message
+	 * back from the memory controller.
+	 */
 	MemoryController memoryController;
 	
 	public Simulator(int p,int n1,int n2 ,int b,int a1,int a2,int C,int d,int d1){
