@@ -1,3 +1,5 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -55,7 +57,7 @@ public class Simulator {
 	 */
 	MemoryController memoryController;
 	
-	public Simulator(int p,int n1,int n2 ,int b,int a1,int a2,int C,int d,int d1){
+	public Simulator(String inputFile ,int p,int n1,int n2 ,int b,int a1,int a2,int C,int d,int d1){
 		this.p=p;
 		this.n1=n1;
 		this.n2=n2;
@@ -65,10 +67,10 @@ public class Simulator {
 		this.C=C;
 		this.d=d;
 		this.d1=d1;
-		initializeUnits();
-		simulate();
+		initializeUnits( inputFile);
+		
 	}
-	void initializeUnits(){
+	void initializeUnits(String inputFile){
 		//Initialize processors===============================================================
 		int base = 2;
 		//the size of l1
@@ -99,30 +101,49 @@ public class Simulator {
 	    	processorsList.add(processor);
 	    }
 	    //Initialize memory===============================================================
-	    //TODO load benchmarks into memory
+	    
 	    String memoryDataFilePath = "";
 	    memory = Memory.getInstance(memoryDataFilePath);
 	    
-	}
-	void simulate(){
-		//Infinite loop(clock cycles)
-		while(true){
-			//TODO 
+	    ArrayList traceList = new ArrayList();
+	  //TODO load benchmarks, run and trace all the states
+	    String line = null;
+		try {
+			FileReader filereader = new FileReader (inputFile);
+			BufferedReader bufferedreader = new BufferedReader (filereader);
+			while ((line = bufferedreader.readLine()) != null){
+				String [] ss = line.split(" ");
+				TraceItem item = new TraceItem();
+				item.cycle =Integer.parseInt(ss[0]) ;
+				item.coreid=Integer.parseInt(ss[1]);
+				item.operationFlag=Integer.parseInt(ss[2]);
+				item.address=ss[3];
+				traceList.add(item);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		for(int i = 0;i<traceList.size();i++){
+			TraceItem item = (TraceItem) traceList.get(i);
+			//TODO TODO
 		}
 	}
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		int p = Integer.parseInt(args[0]);//The power of processors with a root of 2
-		int n1 = Integer.parseInt(args[1]);//The power of the size of every l1 with a root of 2 
-		int n2 = Integer.parseInt(args[2]);//The power of the size of every l2 with a root of 2 
-		int b = Integer.parseInt(args[3]);//The size of a block
-		int a1 = Integer.parseInt(args[4]);//The power of the associativity of l1 with a root of 2 
-		int a2 = Integer.parseInt(args[5]);//The power of the associativity of l2 with a root of 2 
-		int C = Integer.parseInt(args[6]);//The number of delay cycles caused by communicating between two nodes(a node consists of a processor and l1 cache)
-		int d = Integer.parseInt(args[7]);//The number of cycles caused by a l2 hit(The l1 hit is satisfied in the same cycle in which it is issued)
-		int d1 = Integer.parseInt(args[8]);//The number of cycles caused by a memory access
+		String inputFile = args[0];
+		int p = Integer.parseInt(args[1]);//The power of processors with a root of 2
+		int n1 = Integer.parseInt(args[2]);//The power of the size of every l1 with a root of 2 
+		int n2 = Integer.parseInt(args[3]);//The power of the size of every l2 with a root of 2 
+		int b = Integer.parseInt(args[4]);//The size of a block
+		int a1 = Integer.parseInt(args[5]);//The power of the associativity of l1 with a root of 2 
+		int a2 = Integer.parseInt(args[6]);//The power of the associativity of l2 with a root of 2 
+		int C = Integer.parseInt(args[7]);//The number of delay cycles caused by communicating between two nodes(a node consists of a processor and l1 cache)
+		int d = Integer.parseInt(args[8]);//The number of cycles caused by a l2 hit(The l1 hit is satisfied in the same cycle in which it is issued)
+		int d1 = Integer.parseInt(args[9]);//The number of cycles caused by a memory access
+		Simulator simulator = new Simulator(inputFile, p, n1, n2 , b, a1, a2, C, d, d1);
 	}
 
 }
