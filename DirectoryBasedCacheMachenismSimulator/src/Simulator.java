@@ -100,7 +100,9 @@ public class Simulator {
 	    	Processor processor = new Processor(numberOfSetInL1,numberOfSetInL2,associativityOfL1,a2);
 	    	processorsList.add(processor);
 	    }
-	    //Initialize memory===============================================================
+	    //Initialize memory=====
+	    //Or we don't need a memory object, because we don't need to operate memory,
+	    //just assume all the memory addresses that the trace file provides are in imaginable memory
 	    
 	    String memoryDataFilePath = "";
 	    memory = Memory.getInstance(memoryDataFilePath);
