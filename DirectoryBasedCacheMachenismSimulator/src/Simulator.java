@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /*
@@ -47,7 +48,7 @@ public class Simulator {
 	int d1 = 0;
 	
 	LinkedList writeBuffer = new LinkedList();//Stores the blocks that are going te be flushed back to memory
-	ArrayList processorsList = new ArrayList();
+	HashMap processorsTable = new HashMap();
 	
 	Memory memory;
 	/*
@@ -98,7 +99,7 @@ public class Simulator {
 	    int processorsNumber = (int) Math.pow(base, this.p);
 	    for(int i=0;i<processorsNumber;i++){
 	    	Processor processor = new Processor(numberOfSetInL1,numberOfSetInL2,associativityOfL1,a2);
-	    	processorsList.add(processor);
+	    	processorsTable.put(i+"", processor);
 	    }
 	    //Initialize memory=====
 	    //Or we don't need a memory object, because we don't need to operate memory,
@@ -117,7 +118,7 @@ public class Simulator {
 				String [] ss = line.split(" ");
 				TraceItem item = new TraceItem();
 				item.cycle =Integer.parseInt(ss[0]) ;
-				item.coreid=Integer.parseInt(ss[1]);
+				item.coreid=ss[1];
 				item.operationFlag=Integer.parseInt(ss[2]);
 				item.address=ss[3];
 				traceList.add(item);
@@ -128,6 +129,17 @@ public class Simulator {
 		}
 		for(int i = 0;i<traceList.size();i++){
 			TraceItem item = (TraceItem) traceList.get(i);
+			String coreid = item.coreid;
+			int operationFlag = item.operationFlag;
+			Processor processor = (Processor) processorsTable.get(coreid);
+			String address = item.address;
+			if(operationFlag==0){//read operation
+				
+			}else if(operationFlag==1){//write operation
+				
+			}else{
+				
+			}
 			//TODO TODO
 		}
 	}

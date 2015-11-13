@@ -1,7 +1,7 @@
 
 public class TraceItem {
 	int cycle;
-	int coreid;
+	String coreid;
 	int operationFlag;
 	String address;
 
