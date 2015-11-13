@@ -103,12 +103,8 @@ public class Simulator {
 	    	Processor processor = new Processor(numberOfSetInL1,numberOfSetInL2,associativityOfL1,a2);
 	    	processorsTable.put(i+"", processor);
 	    }
-	    //Initialize memory=====
-	    //Or we don't need a memory object, because we don't need to operate memory,
-	    //just assume all the memory addresses that the trace file provides are in imaginable memory
-	    
-	    String memoryDataFilePath = "";
-	    memory = Memory.getInstance(memoryDataFilePath);
+	    //Initialize memory=====Need memory to keep ultimate states of a block
+	    memory = Memory.getInstance();
 	    
 	    tlb = TLB.getInstance();
 	    
@@ -126,6 +122,9 @@ public class Simulator {
 				item.operationFlag=Integer.parseInt(ss[2]);
 				item.address=ss[3];
 				traceList.add(item);
+				//add this memory address to memory
+				MemoryBlock block = new MemoryBlock();
+				memory.addMemoryBlock(item.address, block);
 				System.out.println("read trace file line->"+"  cycle-"+item.cycle+"  coreid-"+item.coreid+"  operationFlag-"+item.operationFlag+"  address-"+item.address);
 			}
 		}catch(Exception e){
