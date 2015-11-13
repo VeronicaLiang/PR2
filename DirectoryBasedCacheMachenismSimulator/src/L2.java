@@ -5,7 +5,7 @@ import java.util.LinkedList;
  */
 public class L2 {
 	/*
-	 * L1's Directory
+	 * L2's Directory
 	 */
 	Directory directory;
 	LinkedList setsList = new LinkedList();
