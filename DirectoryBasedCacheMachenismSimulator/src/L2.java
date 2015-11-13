@@ -4,6 +4,10 @@ import java.util.LinkedList;
  * L2 entity, shared cache by all processors
  */
 public class L2 {
+	/*
+	 * L1's Directory
+	 */
+	Directory directory;
 	LinkedList setsList = new LinkedList();
 	L2(int numberOfSetInL2,int associativity){
 		//Initialize the sets in the cache

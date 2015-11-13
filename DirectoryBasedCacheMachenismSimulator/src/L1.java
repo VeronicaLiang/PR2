@@ -5,10 +5,7 @@ import java.util.LinkedList;
  * And every l1 cache has a directory to manage its block coherence as a Home.
  */
 public class L1 {
-	/*
-	 * L1's Directory
-	 */
-	Directory directory;
+	
 	/*
 	 * L1's sets container
 	 */
