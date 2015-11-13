@@ -20,7 +20,7 @@ public class TLB {
 		return (String) buffer.get(physicalAddress);
 	}
 	public String translatePhysicalToVirtual(String physicalAddress,Processor processor){
-		//TODO
+		//TODO 
 		return (String) buffer.get(physicalAddress);
 	}
 }

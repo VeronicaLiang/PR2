@@ -142,8 +142,17 @@ public class Simulator {
 				//Get the virtual address() through TLB
 				if(tlb.isAvailableInTLB(address)){//virtual address==cache flag:set index:block index
 					String virtualAddress = tlb.getVirtualAddress(address);
+					String indexes[] = virtualAddress.split(":");
+					int cacheFlag = Integer.parseInt(indexes[0]);
+					int setIndex = Integer.parseInt(indexes[1]);
+					int blockIndex = Integer.parseInt(indexes[2]);
+					
 				}else{
 					String virtualAddress = tlb.translatePhysicalToVirtual(address, processor);
+					String indexes[] = virtualAddress.split(":");
+					int cacheFlag = Integer.parseInt(indexes[0]);
+					int setIndex = Integer.parseInt(indexes[1]);
+					int blockIndex = Integer.parseInt(indexes[2]);
 				}
 				//First read from l1
 				
