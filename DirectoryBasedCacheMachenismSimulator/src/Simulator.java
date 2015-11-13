@@ -58,6 +58,8 @@ public class Simulator {
 	 */
 	MemoryController memoryController;
 	
+	TLB tlb;
+	
 	public Simulator(String inputFile ,int p,int n1,int n2 ,int b,int a1,int a2,int C,int d,int d1){
 		this.p=p;
 		this.n1=n1;
@@ -108,6 +110,8 @@ public class Simulator {
 	    String memoryDataFilePath = "";
 	    memory = Memory.getInstance(memoryDataFilePath);
 	    
+	    tlb = TLB.getInstance();
+	    
 	    ArrayList traceList = new ArrayList();
 	  //TODO load benchmarks, run and trace all the states
 	    String line = null;
@@ -134,13 +138,21 @@ public class Simulator {
 			Processor processor = (Processor) processorsTable.get(coreid);
 			String address = item.address;
 			if(operationFlag==0){//read operation
+				//TODO TODO
+				//Get the virtual address() through TLB
+				if(tlb.isAvailableInTLB(address)){//virtual address==cache flag:set index:block index
+					String virtualAddress = tlb.getVirtualAddress(address);
+				}else{
+					String virtualAddress = tlb.translatePhysicalToVirtual(address, processor);
+				}
+				//First read from l1
 				
 			}else if(operationFlag==1){//write operation
-				
+				//TODO TODO
 			}else{
 				
 			}
-			//TODO TODO
+			
 		}
 	}
 	
