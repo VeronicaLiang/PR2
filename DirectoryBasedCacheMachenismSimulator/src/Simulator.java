@@ -137,30 +137,81 @@ public class Simulator {
 			int operationFlag = item.operationFlag;
 			Processor processor = (Processor) processorsTable.get(coreid);
 			String address = item.address;
-			if(operationFlag==0){//read operation
-				//TODO TODO
-				//Get the virtual address() through TLB
-				if(tlb.isAvailableInTLB(address)){//virtual address==cache flag:set index:block index
-					String virtualAddress = tlb.getVirtualAddress(address);
-					String indexes[] = virtualAddress.split(":");
-					int cacheFlag = Integer.parseInt(indexes[0]);
-					int setIndex = Integer.parseInt(indexes[1]);
-					int blockIndex = Integer.parseInt(indexes[2]);
-					
-				}else{
-					String virtualAddress = tlb.translatePhysicalToVirtual(address, processor);
-					String indexes[] = virtualAddress.split(":");
-					int cacheFlag = Integer.parseInt(indexes[0]);
-					int setIndex = Integer.parseInt(indexes[1]);
-					int blockIndex = Integer.parseInt(indexes[2]);
+			System.out.println("Start to look the block up in the processor's l1->"+"  -");
+			//Look the block up in the processor's l1
+			boolean isL1Hit = false;
+			for(int j=0;j<processor.l1.setsList.size();j++){
+				Set set = (Set) processor.l1.setsList.get(j);
+				for(int n=0;n<set.blockList.size();n++){
+					Block b = (Block) set.blockList.get(n);
+					if(b.tag==address){
+						//l1 hit
+						isL1Hit = true;
+						System.out.println("Get a l1 hit->"+"  -");
+						//check the block's state and owner
+						//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
+						if(b.state==0){
+							
+						}else if(b.state==1){
+							
+						}else if(b.state==2){
+							
+						}
+					}
 				}
-				//First read from l1
-				
-			}else if(operationFlag==1){//write operation
-				//TODO TODO
-			}else{
-				
 			}
+			boolean isL2Hit = false;
+			if(isL1Hit==false){
+				//Look the block up in the processor's l2
+				for(int j=0;j<processor.l2.setsList.size();j++){
+					Set set = (Set) processor.l2.setsList.get(j);
+					for(int n=0;n<set.blockList.size();n++){
+						Block b = (Block) set.blockList.get(n);
+						if(b.tag==address){
+							//l2 hit
+							isL1Hit = true;
+							System.out.println("Get a l2 hit->"+"  -");
+							//check the block's state and owner
+							//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
+							if(b.state==0){
+								
+							}else if(b.state==1){
+								
+							}else if(b.state==2){
+								
+							}
+						}
+					}
+				}
+			}
+			if(isL2Hit==false && isL1Hit==false){
+				//Load from memeory
+				System.out.println("Load from memeory and start count latency cycles->"+"  -");
+			}
+//			if(operationFlag==0){//read operation
+//				//TODO TODO
+//				//Get the virtual address() through TLB
+//				if(tlb.isAvailableInTLB(address)){//virtual address==cache flag:set index:block index
+//					String virtualAddress = tlb.getVirtualAddress(address);
+//					String indexes[] = virtualAddress.split(":");
+//					int cacheFlag = Integer.parseInt(indexes[0]);
+//					int setIndex = Integer.parseInt(indexes[1]);
+//					int blockIndex = Integer.parseInt(indexes[2]);
+//					
+//				}else{
+//					String virtualAddress = tlb.translatePhysicalToVirtual(address, processor);
+//					String indexes[] = virtualAddress.split(":");
+//					int cacheFlag = Integer.parseInt(indexes[0]);
+//					int setIndex = Integer.parseInt(indexes[1]);
+//					int blockIndex = Integer.parseInt(indexes[2]);
+//				}
+				//First read from l1
+//				
+//			}else if(operationFlag==1){//write operation
+//				//TODO TODO
+//			}else{
+//				
+//			}
 			
 		}
 	}
