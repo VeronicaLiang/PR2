@@ -2,7 +2,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedList;
+import javax.xml.bind.DatatypeConverter;
 
 /*
  * The simulator is trace driven. That is memory load and store operations will specified in an
@@ -70,34 +72,53 @@ public class Simulator {
 		this.C=C;
 		this.d=d;
 		this.d1=d1;
-		initializeUnits( inputFile);
-		
+		Hashtable<String, ArrayList> commands = initializeUnits( inputFile);
+		int clockcycle = 1;
+		boolean finish = false;
+		while(!finish){
+			// extract all commands need to operate in this clock cycle
+			ArrayList instructions = new ArrayList();
+			instructions = commands.get(String.valueOf(clockcycle));
+			for(int i=0; i<instructions.size(); i++){
+				TraceItem cur = (TraceItem) instructions.get(i);
+				if(cur.operationFlag == 0){
+					// Issue a read operation
+				}else if(cur.operationFlag == 1){
+					// Issue a write operation
+				}
+			}
+			clockcycle++;
+			//TODO need to check when all operations are finished then set up the finish flag = true
+		}
+
 	}
-	void initializeUnits(String inputFile){
+
+	Hashtable<String, ArrayList> initializeUnits(String inputFile){
 		//Initialize processors===============================================================
 		int base = 2;
 		//the size of l1
 		int sizeOfl1 = (int) Math.pow(base, n1);
 		//the number of blocks in the l1=the size of l1/the size of a block
-		int numberOfBlocksInL1 = sizeOfl1/b;
-		
+		int numberOfBlocksInL1 = sizeOfl1/((int) Math.pow(base, b));
+
 		//the the associativity of l1
 		int associativityOfL1 = (int) Math.pow(base, a1);
 		//so the number of sets in the l1=the number of blocks in the l1/the associativity of l1
-		int numberOfSetInL1 = numberOfBlocksInL1/associativityOfL1;
-		
-		
+//		int numberOfSetInL1 = numberOfBlocksInL1/associativityOfL1;
+		int numberOfSetInL1 = (int) Math.pow(base,(n1-a1-b));
+
 		//the size of l1
 		int sizeOfl2 = (int) Math.pow(base, n2);
 		//the number of blocks in the l2=the size of l2/the size of a block
-		int numberOfBlocksInL2 = sizeOfl2/b;
-		
+		int numberOfBlocksInL2 = sizeOfl2/((int) Math.pow(base, b));
+
 		//the the associativity of l2
 	    int associativityOfL2 = (int) Math.pow(base, a2);
 		//so the number of sets in the l2=the number of blocks in the l2/the associativity of l2
-		int numberOfSetInL2 = numberOfBlocksInL2/associativityOfL2;
-		
-		
+//		int numberOfSetInL2 = numberOfBlocksInL2/associativityOfL2;
+		int numberOfSetInL2 = (int) Math.pow(base,(n2-a2-b));
+
+
 	    int processorsNumber = (int) Math.pow(base, this.p);
 	    for(int i=0;i<processorsNumber;i++){
 	    	Processor processor = new Processor(numberOfSetInL1,numberOfSetInL2,associativityOfL1,a2);
@@ -108,9 +129,12 @@ public class Simulator {
 	    
 	    tlb = TLB.getInstance();
 	    
-	    ArrayList traceList = new ArrayList();
+//	    ArrayList traceList = new ArrayList();
 	  //TODO load benchmarks, run and trace all the states
 	    String line = null;
+		// Use a hashtable to record all commands from the trace file. The key is the clock cycle, so that in each cycle
+		// the commands that need to operate can be easily extracted.
+		Hashtable<String, ArrayList> commands = new Hashtable<String, ArrayList>();
 		try {
 			FileReader filereader = new FileReader (inputFile);
 			BufferedReader bufferedreader = new BufferedReader (filereader);
@@ -121,7 +145,17 @@ public class Simulator {
 				item.coreid=ss[1];
 				item.operationFlag=Integer.parseInt(ss[2]);
 				item.address=ss[3];
-				traceList.add(item);
+//				byte [] test = new byte[40];
+//				test = DatatypeConverter.parseHexBinary(ss[3]);
+				boolean ccexist = commands.containsKey(ss[0]);
+				if(ccexist){
+					commands.get(ss[0]).add(item);
+				}else{
+					ArrayList tmp = new ArrayList();
+					tmp.add(item);
+					commands.put(ss[0],tmp);
+				}
+//				traceList.add(item);
 				//add this memory address to memory
 				MemoryBlock block = new MemoryBlock();
 				memory.addMemoryBlock(item.address, block);
@@ -130,63 +164,67 @@ public class Simulator {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		for(int i = 0;i<traceList.size();i++){
-			TraceItem item = (TraceItem) traceList.get(i);
-			String coreid = item.coreid;
-			int operationFlag = item.operationFlag;
-			Processor processor = (Processor) processorsTable.get(coreid);
-			String address = item.address;
-			System.out.println("Start to look the block up in the processor's l1->"+"  -");
-			//Look the block up in the processor's l1
-			boolean isL1Hit = false;
-			for(int j=0;j<processor.l1.setsList.size();j++){
-				Set set = (Set) processor.l1.setsList.get(j);
-				for(int n=0;n<set.blockList.size();n++){
-					Block b = (Block) set.blockList.get(n);
-					if(b.tag==address){
-						//l1 hit
-						isL1Hit = true;
-						System.out.println("Get a l1 hit->"+"  -");
-						//check the block's state and owner
-						//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
-						if(b.state==0){
-							
-						}else if(b.state==1){
-							
-						}else if(b.state==2){
-							
-						}
-					}
-				}
-			}
-			boolean isL2Hit = false;
-			if(isL1Hit==false){
-				//Look the block up in the processor's l2
-				for(int j=0;j<processor.l2.setsList.size();j++){
-					Set set = (Set) processor.l2.setsList.get(j);
-					for(int n=0;n<set.blockList.size();n++){
-						Block b = (Block) set.blockList.get(n);
-						if(b.tag==address){
-							//l2 hit
-							isL1Hit = true;
-							System.out.println("Get a l2 hit->"+"  -");
-							//check the block's state and owner
-							//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
-							if(b.state==0){
-								
-							}else if(b.state==1){
-								
-							}else if(b.state==2){
-								
-							}
-						}
-					}
-				}
-			}
-			if(isL2Hit==false && isL1Hit==false){
-				//Load from memeory
-				System.out.println("Load from memeory and start count latency cycles->"+"  -");
-			}
+		return commands;
+
+
+
+//		for(int i = 0;i<traceList.size();i++){
+//			TraceItem item = (TraceItem) traceList.get(i);
+//			String coreid = item.coreid;
+//			int operationFlag = item.operationFlag;
+//			Processor processor = (Processor) processorsTable.get(coreid);
+//			String address = item.address;
+//			System.out.println("Start to look the block up in the processor's l1->"+"  -");
+//			//Look the block up in the processor's l1
+//			boolean isL1Hit = false;
+//			for(int j=0;j<processor.l1.setsList.size();j++){
+//				Set set = (Set) processor.l1.setsList.get(j);
+//				for(int n=0;n<set.blockList.size();n++){
+//					Block b = (Block) set.blockList.get(n);
+//					if(b.tag==address){
+//						//l1 hit
+//						isL1Hit = true;
+//						System.out.println("Get a l1 hit->"+"  -");
+//						//check the block's state and owner
+//						//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
+//						if(b.state==0){
+//
+//						}else if(b.state==1){
+//
+//						}else if(b.state==2){
+//
+//						}
+//					}
+//				}
+//			}
+//			boolean isL2Hit = false;
+//			if(isL1Hit==false){
+//				//Look the block up in the processor's l2
+//				for(int j=0;j<processor.l2.setsList.size();j++){
+//					Set set = (Set) processor.l2.setsList.get(j);
+//					for(int n=0;n<set.blockList.size();n++){
+//						Block b = (Block) set.blockList.get(n);
+//						if(b.tag==address){
+//							//l2 hit
+//							isL1Hit = true;
+//							System.out.println("Get a l2 hit->"+"  -");
+//							//check the block's state and owner
+//							//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
+//							if(b.state==0){
+//
+//							}else if(b.state==1){
+//
+//							}else if(b.state==2){
+//
+//							}
+//						}
+//					}
+//				}
+//			}
+//			if(isL2Hit==false && isL1Hit==false){
+//				//Load from memeory
+//				System.out.println("Load from memeory and start count latency cycles->"+"  -");
+//			}
 //			if(operationFlag==0){//read operation
 //				//TODO TODO
 //				//Get the virtual address() through TLB
@@ -211,10 +249,41 @@ public class Simulator {
 //			}else{
 //				
 //			}
-			
-		}
+//
+//		}
 	}
-	
+
+	void readOperation(TraceItem op){
+		String coreid = op.coreid;
+		Processor processor = (Processor) processorsTable.get(coreid);
+		String address = op.address;
+		boolean readHitL1 = false;
+		boolean readHitL2 = false;
+		if(readHitL1){
+
+		}else if(readHitL2){
+
+		}else{
+
+		}
+
+	}
+
+	void writeOperation(TraceItem op){
+		String coreid = op.coreid;
+		Processor processor = (Processor) processorsTable.get(coreid);
+		String address = op.address;
+		boolean writeHitL1 = false;
+		boolean writeHitL2 = false;
+		if(writeHitL1){
+
+		}else if(writeHitL2){
+
+		}else{
+
+		}
+
+	}
 	/**
 	 * @param args
 	 */
