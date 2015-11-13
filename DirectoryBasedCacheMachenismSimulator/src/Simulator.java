@@ -119,6 +119,7 @@ public class Simulator {
 				item.operationFlag=Integer.parseInt(ss[2]);
 				item.address=ss[3];
 				traceList.add(item);
+				System.out.println("read trace file line->"+line);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
