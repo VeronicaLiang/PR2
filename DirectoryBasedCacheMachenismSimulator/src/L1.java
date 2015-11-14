@@ -9,7 +9,7 @@ public class L1 {
 	/*
 	 * L1's sets container
 	 */
-	LinkedList setsList = new LinkedList();
+	LinkedList<Set> setsList = new LinkedList<Set>();
 	L1(int numberOfSetInL1,int associativity){
 		//Initialize the sets in the cache
 		for(int i=0;i<numberOfSetInL1;i++){

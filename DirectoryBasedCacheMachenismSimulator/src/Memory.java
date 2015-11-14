@@ -11,13 +11,13 @@ public class Memory {
 		}
 		return memory;
 	}
-	private HashMap blocks = new HashMap();
+	private HashMap<String,MemoryBlock> blocks = new HashMap<String,MemoryBlock>();
 	
 	public Object addMemoryBlock(String address,MemoryBlock block){
 		return blocks.put(address, block);
 	}
-	public Object getMemoryBlock(String address,MemoryBlock block){
-		return blocks.put(address, block);
+	public MemoryBlock getMemoryBlock(String address){
+		return blocks.get(address);
 	}
 	
 }

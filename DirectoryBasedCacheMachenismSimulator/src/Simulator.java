@@ -78,27 +78,30 @@ public class Simulator {
 		boolean finish = false;
 		while(!finish){
 			//execute all the commands in the message queue
-			for(int i=0;i<processorsTable.size();i++){
-		    	Processor processor = (Processor) processorsTable.get(i+"");
-		    	if(messageQueue.containsKey(clockcycle)){
-		    		ArrayList<Message> msgs = messageQueue.get(clockcycle);
-		    		for(int n=0;n<msgs.size();n++){
-		    			//execute all the messages in the message queue
-		    			Message msg = msgs.get(n);
-		    			if(msg.messageType.equals(Message.FATCH)){
-		    				//TODO
-		    			}else if(msg.messageType.equals(Message.READ_INVALIDATE)){
-		    				//TODO
-		    			}else if(msg.messageType.equals(Message.READ_INVALIDATE)){
-		    				//TODO
-		    			}else if(msg.messageType.equals(Message.READ_MISS_L1)){
-		    				//TODO
-		    			}else if(msg.messageType.equals(Message.WRITE_MISS_L1)){
-		    				//TODO
-		    			}
-		    		}
-		    	}
-		    }
+			if(messageQueue.containsKey(clockcycle)){
+	    		ArrayList<Message> msgs = messageQueue.get(clockcycle);
+	    		for(int i=0;i<msgs.size();i++){
+	    			//execute all the messages in the message queue
+	    			Message msg = msgs.get(i);
+	    			if(msg.messageType.equals(Message.FATCH)){
+	    				//TODO
+	    			}else if(msg.messageType.equals(Message.READ_INVALIDATE)){
+	    				//TODO
+	    			}else if(msg.messageType.equals(Message.READ_INVALIDATE)){
+	    				//TODO
+	    			}else if(msg.messageType.equals(Message.READ_MISS_L1)){
+	    				//readOperation(String cacheLevel, String coreid, String address, int currentclockcycle)
+	    				readOperation("L2",msg.homeNodeAddress.split(":")[0],msg.dataAddress,clockcycle);
+	    			}else if(msg.messageType.equals(Message.READ_MISS_L2)){
+	    				//L2 read miss, transfer the block data in the memory to this processor's l2, and make the block' state as shared.
+	    				readOperation("Memory",msg.homeNodeAddress.split(":")[0],msg.dataAddress,clockcycle);
+	    			}else if(msg.messageType.equals(Message.WRITE_MISS_L1)){
+	    				//TODO
+	    			}else if(msg.messageType.equals(Message.MEMORY_TO_CACHE)){
+	    				//TODO
+	    			}
+	    		}
+	    	}
 			
 			
 			// extract all commands need to operate in this clock cycle
@@ -110,181 +113,11 @@ public class Simulator {
 				String address = cur.address;
 				if(cur.operationFlag == 0){
 					// Issue a read operation
-					boolean readHitL1 = false;
-					for(int j=0;j<processor.l1.setsList.size();j++){
-						Set set = (Set) processor.l1.setsList.get(j);
-						for(int n=0;n<set.blockList.size();n++){
-							Block block = (Block) set.blockList.get(n);
-							if(block.tag==address){
-								//l1 hit
-								readHitL1 = true;
-								System.out.println("L1 read hit->");
-								//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
-								if(block.state==0){
-									//Send a message to the owner, and wait for its reply
-									Message message = new Message();
-									message.remoteNodeAddress = block.owner;
-									message.homeNodeAddress = cur.coreid+":"+j+":"+n;
-									message.messageType = Message.READ_INVALIDATE;
-									message.dataAddress = address;
-									int manhattanDistance = 3;//TODO To calculate manhattan distance
-									int executeCycle = manhattanDistance*C+clockcycle;
-									if(messageQueue.containsKey(executeCycle)){
-										messageQueue.get(executeCycle).add(message);
-									}else{
-										ArrayList<Message> al = new ArrayList<Message>();
-										al.add(message);
-										messageQueue.put(executeCycle, al);
-									}
-									System.out.println("L1 read hit, but the data in the local node is invalid, so send a message to the owner demanding newly value: "+address);
-									
-								}else if(block.state==1){
-									//Exactly one node has a copy of the block, and it has written the block, so the memory copy is out of date,
-									//The processor is called the owner of the block
-									//check who is the owner, if this node is the owner, then it will cost no latency, but if the owner is a remote node,
-									// put this in the message queue.
-									String ss[] = block.owner.split(":");
-									int nodeid = Integer.parseInt(ss[0]);
-									if(nodeid==Integer.parseInt(cur.coreid)){
-										//The processor is the home node. Read the block
-										System.out.println("The locol node is the owner. L1 read hit and successfully read a block in L1 cache:"+address);
-									}else{
-										int setIndex = Integer.parseInt(ss[1]);
-										int blockIndex = Integer.parseInt(ss[2]);
-										//Send a message to home node to fetch the block that is up to date.
-										Message message = new Message();
-										message.remoteNodeAddress = block.owner;
-										message.homeNodeAddress = cur.coreid+":"+j+":"+n;
-										message.messageType = Message.FATCH;
-										message.dataAddress = address;
-										int manhattanDistance = 3;//TODO To calculate manhattan distance
-										int executeCycle = manhattanDistance*C+clockcycle;
-										if(messageQueue.containsKey(executeCycle)){
-											messageQueue.get(executeCycle).add(message);
-										}else{
-											ArrayList<Message> al = new ArrayList<Message>();
-											al.add(message);
-											messageQueue.put(executeCycle, al);
-										}
-										
-									}
-								}else if(block.state==2){
-									//One or more nodes have the block cached, and the value in memory is up to date(as well as in all the caches)
-									System.out.println("The locol node is the sharer. L1 read hit and successfully read a block in L1 cache:"+address);
-								}
-							}
-						}
-					}
-					if(readHitL1==false){
-						//add this command to the message queue
-						Message message = new Message();
-						message.homeNodeAddress = cur.coreid;
-						message.messageType = Message.READ_MISS_L1;
-						message.dataAddress = address;
-						int executeCycle = d+clockcycle;
-						if(messageQueue.containsKey(executeCycle)){
-							messageQueue.get(executeCycle).add(message);
-						}else{
-							ArrayList<Message> al = new ArrayList<Message>();
-							al.add(message);
-							messageQueue.put(executeCycle, al);
-						}
-					}
+					//readOperation(String cacheLevel, String coreid, String address, int currentclockcycle)
+    				readOperation("L2",cur.coreid,address,clockcycle);
 				}else if(cur.operationFlag == 1){
 					// Issue a write operation
-					boolean writeHitL1 = false;
-					for(int j=0;j<processor.l1.setsList.size();j++){
-						Set set = (Set) processor.l1.setsList.get(j);
-						for(int n=0;n<set.blockList.size();n++){
-							Block block = (Block) set.blockList.get(n);
-							if(block.tag==address){
-								//l1 hit
-								writeHitL1 = true;
-								System.out.println("L1 write hit->");
-								//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
-								if(block.state==0){
-									//Send a message to the owner demanding the ownership, and wait for its reply
-									Message message = new Message();
-									message.remoteNodeAddress = block.owner;
-									message.homeNodeAddress = cur.coreid+":"+j+":"+n;
-									message.messageType = Message.WRITE_INVALIDATE;
-									message.dataAddress = address;
-									int manhattanDistance = 3;//TODO To calculate manhattan distance
-									int executeCycle = manhattanDistance*C+clockcycle;
-									if(messageQueue.containsKey(executeCycle)){
-										messageQueue.get(executeCycle).add(message);
-									}else{
-										ArrayList<Message> al = new ArrayList<Message>();
-										al.add(message);
-										messageQueue.put(executeCycle, al);
-									}
-									System.out.println("L1 read hit, but the data in the local node is invalid, so send a message to the owner demanding newly value: "+address);
-								}else if(block.state==1){
-									//Exactly one node has a copy of the block, and it has written the block, so the memory copy is out of date,
-									//The processor is called the owner of the block
-									//check who is the owner, if this node is the owner, then it will cost no latency, but if the owner is a remote node,
-									// put this in the message queue.
-									String ss[] = block.owner.split(":");
-									int nodeid = Integer.parseInt(ss[0]);
-									if(nodeid==Integer.parseInt(cur.coreid)){
-										//The processor is the home node. Write the block
-										System.out.println("The processor is the home node. L1 write hit and successfully write a block in L1 cache:"+address);
-									}else{
-										int setIndex = Integer.parseInt(ss[1]);
-										int blockIndex = Integer.parseInt(ss[2]);
-										//TODO Send a message to all the nodes to let them know that one node has changed the block, demand the block's ownership.
-										Message message = new Message();
-										message.remoteNodeAddress = block.owner;
-										message.homeNodeAddress = cur.coreid+":"+j+":"+n;
-										message.messageType = Message.WRITE_INVALIDATE;
-										message.dataAddress = address;
-										int manhattanDistance = 3;//TODO To calculate manhattan distances of every sharers'.
-										int executeCycle = manhattanDistance*C+clockcycle;
-										if(messageQueue.containsKey(executeCycle)){
-											messageQueue.get(executeCycle).add(message);
-										}else{
-											ArrayList<Message> al = new ArrayList<Message>();
-											al.add(message);
-											messageQueue.put(executeCycle, al);
-										}
-										System.out.println("L1 write hit, but the block's state is modified, so send a message to all the sharers demanding the ownership :"+address);
-									}
-								}else if(block.state==2){
-									//One or more nodes have the block cached, and send a message to all the sharer demanding the ownership.
-									Message message = new Message();
-									message.remoteNodeAddress = block.owner;
-									message.homeNodeAddress = cur.coreid+":"+j+":"+n;
-									message.messageType = Message.WRITE_INVALIDATE;
-									message.dataAddress = address;
-									int manhattanDistance = 3;//TODO To calculate manhattan distances of every sharers'.
-									int executeCycle = manhattanDistance*C+clockcycle;
-									if(messageQueue.containsKey(executeCycle)){
-										messageQueue.get(executeCycle).add(message);
-									}else{
-										ArrayList<Message> al = new ArrayList<Message>();
-										al.add(message);
-										messageQueue.put(executeCycle, al);
-									}
-									System.out.println("L1 write hit, but the block's state is shared, so send a message to all the sharers demanding the ownership :"+address);
-								}
-							}
-						}
-					}
-					if(writeHitL1==false){
-						//add this command to the message queue
-						Message message = new Message();
-						message.homeNodeAddress = cur.coreid;
-						message.messageType = Message.WRITE_MISS_L1;
-						message.dataAddress = address;
-						int executeCycle = d+clockcycle;
-						if(messageQueue.containsKey(executeCycle)){
-							messageQueue.get(executeCycle).add(message);
-						}else{
-							ArrayList<Message> al = new ArrayList<Message>();
-							al.add(message);
-							messageQueue.put(executeCycle, al);
-						}
-					}
+					writeOperation("L1", cur.coreid,address, clockcycle);
 				}
 			}
 			clockcycle++;
@@ -364,36 +197,234 @@ public class Simulator {
 		return commands;
 	}
 
-	void readOperation(TraceItem op){
-		String coreid = op.coreid;
+	void readOperation(String cacheLevel, String coreid, String address, int currentclockcycle){
+		// Issue a read operation
 		Processor processor = (Processor) processorsTable.get(coreid);
-		String address = op.address;
-		boolean readHitL1 = false;
-		boolean readHitL2 = false;
-		if(readHitL1){
-
-		}else if(readHitL2){
-
+		boolean readHit = false;
+		LinkedList<Set> setsList = new LinkedList<Set>();
+		if(cacheLevel.equals("L1")){
+			setsList = processor.l1.setsList;
+		}else if(cacheLevel.equals("L2")){
+			setsList = processor.l2.setsList;
 		}else{
-
+			MemoryBlock mBlock = memory.getMemoryBlock(address);
+			//check if the block's state MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
+			if(mBlock.state==1){
+				//if the block is modified, then send a message to its owner.
+				//TODO 
+			}else{
+				//load the block to the processor l2 cache
+				for(int j=0;j<setsList.size();j++){
+					Set set = (Set) setsList.get(j);
+					for(int n=0;n<set.blockList.size();n++){
+						Block block = (Block) set.blockList.get(n);
+						if(block.tag==null){
+							System.out.println("Find a empty block in the processor's l2 cache, load date into it");
+							//add the empty block as sharer
+							mBlock.sharers.add(coreid+":"+j+":"+n);
+							//send a the data to the empty block. TODO does it cost d1 cycles?
+							Message message = new Message();
+							message.remoteNodeAddress = coreid+":"+j+":"+n;
+							message.messageType = Message.MEMORY_TO_CACHE;
+							message.dataAddress = address;
+							int executeCycle = d1+currentclockcycle;
+							if(messageQueue.containsKey(executeCycle)){
+								messageQueue.get(executeCycle).add(message);
+							}else{
+								ArrayList<Message> al = new ArrayList<Message>();
+								al.add(message);
+								messageQueue.put(executeCycle, al);
+							}
+						}
+					}
+				}
+			}
+		}
+		for(int j=0;j<setsList.size();j++){
+			Set set = (Set) setsList.get(j);
+			for(int n=0;n<set.blockList.size();n++){
+				Block block = (Block) set.blockList.get(n);
+				if(block.tag==address){
+					//l1 hit
+					readHit = true;
+					System.out.println(cacheLevel+" read hit->");
+					//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
+					if(block.state==0){
+						//Send a message to the owner, and wait for its reply
+						Message message = new Message();
+						message.remoteNodeAddress = block.owner;
+						message.homeNodeAddress = coreid+":"+j+":"+n;
+						message.messageType = Message.READ_INVALIDATE;
+						message.dataAddress = address;
+						int manhattanDistance = 3;//TODO To calculate manhattan distance
+						int executeCycle = manhattanDistance*C+currentclockcycle;
+						if(messageQueue.containsKey(executeCycle)){
+							messageQueue.get(executeCycle).add(message);
+						}else{
+							ArrayList<Message> al = new ArrayList<Message>();
+							al.add(message);
+							messageQueue.put(executeCycle, al);
+						}
+						System.out.println(cacheLevel+" read hit, but the data in the local node is invalid, so send a message to the owner demanding newly value: "+address);
+						
+					}else if(block.state==1){
+						//Exactly one node has a copy of the block, and it has written the block, so the memory copy is out of date,
+						//The processor is called the owner of the block
+						//check who is the owner, if this node is the owner, then it will cost no latency, but if the owner is a remote node,
+						// put this in the message queue.
+						String ss[] = block.owner.split(":");
+						int nodeid = Integer.parseInt(ss[0]);
+						if(nodeid==Integer.parseInt(coreid)){
+							//The processor is the home node. Read the block
+							System.out.println("The locol node is the owner. "+cacheLevel+" read hit and successfully read a block in "+cacheLevel+" cache:"+address);
+						}else{
+							int setIndex = Integer.parseInt(ss[1]);
+							int blockIndex = Integer.parseInt(ss[2]);
+							//Send a message to home node to fetch the block that is up to date.
+							Message message = new Message();
+							message.remoteNodeAddress = block.owner;
+							message.homeNodeAddress = coreid+":"+j+":"+n;
+							message.messageType = Message.FATCH;
+							message.dataAddress = address;
+							int manhattanDistance = 3;//TODO To calculate manhattan distance
+							int executeCycle = manhattanDistance*C+currentclockcycle;
+							if(messageQueue.containsKey(executeCycle)){
+								messageQueue.get(executeCycle).add(message);
+							}else{
+								ArrayList<Message> al = new ArrayList<Message>();
+								al.add(message);
+								messageQueue.put(executeCycle, al);
+							}
+							
+						}
+					}else if(block.state==2){
+						//One or more nodes have the block cached, and the value in memory is up to date(as well as in all the caches)
+						System.out.println("The locol node is the sharer. "+cacheLevel+" read hit and successfully read a block in "+cacheLevel+" cache:"+address);
+					}
+				}
+			}
+		}
+		if(readHit==false){
+			
+			//add this command to the message queue
+			Message message = new Message();
+			message.homeNodeAddress = coreid;
+			int executeCycle = currentclockcycle;
+			if(cacheLevel.equals("L1")){
+				message.messageType = Message.READ_MISS_L1;
+				executeCycle = d+currentclockcycle;
+			}else{
+				message.messageType = Message.READ_MISS_L2;
+				executeCycle = d1+currentclockcycle;
+			}
+			message.dataAddress = address;
+			
+			if(messageQueue.containsKey(executeCycle)){
+				messageQueue.get(executeCycle).add(message);
+			}else{
+				ArrayList<Message> al = new ArrayList<Message>();
+				al.add(message);
+				messageQueue.put(executeCycle, al);
+			}
 		}
 
 	}
 
-	void writeOperation(TraceItem op){
-		String coreid = op.coreid;
+	void writeOperation(String cacheLevel, String coreid, String address, int currentclockcycle){
+		boolean writeHit = false;
 		Processor processor = (Processor) processorsTable.get(coreid);
-		String address = op.address;
-		boolean writeHitL1 = false;
-		boolean writeHitL2 = false;
-		if(writeHitL1){
-
-		}else if(writeHitL2){
-
-		}else{
-
+		for(int j=0;j<processor.l1.setsList.size();j++){
+			Set set = (Set) processor.l1.setsList.get(j);
+			for(int n=0;n<set.blockList.size();n++){
+				Block block = (Block) set.blockList.get(n);
+				if(block.tag==address){
+					//l1 hit
+					writeHit = true;
+					System.out.println("L1 write hit->");
+					//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
+					if(block.state==0){
+						//Send a message to the owner demanding the ownership, and wait for its reply
+						Message message = new Message();
+						message.remoteNodeAddress = block.owner;
+						message.homeNodeAddress = coreid+":"+j+":"+n;
+						message.messageType = Message.WRITE_INVALIDATE;
+						message.dataAddress = address;
+						int manhattanDistance = 3;//TODO To calculate manhattan distance
+						int executeCycle = manhattanDistance*C+currentclockcycle;
+						if(messageQueue.containsKey(executeCycle)){
+							messageQueue.get(executeCycle).add(message);
+						}else{
+							ArrayList<Message> al = new ArrayList<Message>();
+							al.add(message);
+							messageQueue.put(executeCycle, al);
+						}
+						System.out.println("L1 read hit, but the data in the local node is invalid, so send a message to the owner demanding newly value: "+address);
+					}else if(block.state==1){
+						//Exactly one node has a copy of the block, and it has written the block, so the memory copy is out of date,
+						//The processor is called the owner of the block
+						//check who is the owner, if this node is the owner, then it will cost no latency, but if the owner is a remote node,
+						// put this in the message queue.
+						String ss[] = block.owner.split(":");
+						int nodeid = Integer.parseInt(ss[0]);
+						if(nodeid==Integer.parseInt(coreid)){
+							//The processor is the home node. Write the block
+							System.out.println("The processor is the home node. L1 write hit and successfully write a block in L1 cache:"+address);
+						}else{
+							int setIndex = Integer.parseInt(ss[1]);
+							int blockIndex = Integer.parseInt(ss[2]);
+							//TODO Send a message to all the nodes to let them know that one node has changed the block, demand the block's ownership.
+							Message message = new Message();
+							message.remoteNodeAddress = block.owner;
+							message.homeNodeAddress = coreid+":"+j+":"+n;
+							message.messageType = Message.WRITE_INVALIDATE;
+							message.dataAddress = address;
+							int manhattanDistance = 3;//TODO To calculate manhattan distances of every sharers'.
+							int executeCycle = manhattanDistance*C+currentclockcycle;
+							if(messageQueue.containsKey(executeCycle)){
+								messageQueue.get(executeCycle).add(message);
+							}else{
+								ArrayList<Message> al = new ArrayList<Message>();
+								al.add(message);
+								messageQueue.put(executeCycle, al);
+							}
+							System.out.println("L1 write hit, but the block's state is modified, so send a message to all the sharers demanding the ownership :"+address);
+						}
+					}else if(block.state==2){
+						//One or more nodes have the block cached, and send a message to all the sharer demanding the ownership.
+						Message message = new Message();
+						message.remoteNodeAddress = block.owner;
+						message.homeNodeAddress = coreid+":"+j+":"+n;
+						message.messageType = Message.WRITE_INVALIDATE;
+						message.dataAddress = address;
+						int manhattanDistance = 3;//TODO To calculate manhattan distances of every sharers'.
+						int executeCycle = manhattanDistance*C+currentclockcycle;
+						if(messageQueue.containsKey(executeCycle)){
+							messageQueue.get(executeCycle).add(message);
+						}else{
+							ArrayList<Message> al = new ArrayList<Message>();
+							al.add(message);
+							messageQueue.put(executeCycle, al);
+						}
+						System.out.println("L1 write hit, but the block's state is shared, so send a message to all the sharers demanding the ownership :"+address);
+					}
+				}
+			}
 		}
-
+		if(writeHit==false){
+			//add this command to the message queue
+			Message message = new Message();
+			message.homeNodeAddress = coreid;
+			message.messageType = Message.WRITE_MISS_L1;
+			message.dataAddress = address;
+			int executeCycle = d+currentclockcycle;
+			if(messageQueue.containsKey(executeCycle)){
+				messageQueue.get(executeCycle).add(message);
+			}else{
+				ArrayList<Message> al = new ArrayList<Message>();
+				al.add(message);
+				messageQueue.put(executeCycle, al);
+			}
+		}
 	}
 	/**
 	 * @param args
