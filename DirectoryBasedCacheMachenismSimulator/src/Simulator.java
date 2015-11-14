@@ -76,13 +76,57 @@ public class Simulator {
 		int clockcycle = 1;
 		boolean finish = false;
 		while(!finish){
+			//execute all the commands in the message queue
+			for(int i=0;i<processorsTable.size();i++){
+		    	Processor processor = (Processor) processorsTable.get(i+"");
+		    	if(processor.messageQueue.containsKey(clockcycle)){
+		    		ArrayList<TraceItem> msgs = processor.messageQueue.get(clockcycle);
+		    		for(int n=0;n<msgs.size();n++){
+		    			//execute all the messages in the message queue
+		    			TraceItem msg = msgs.get(n);
+		    			//TODO
+		    		}
+		    	}
+		    }
+			
+			
 			// extract all commands need to operate in this clock cycle
 			ArrayList instructions = new ArrayList();
 			instructions = commands.get(String.valueOf(clockcycle));
 			for(int i=0; i<instructions.size(); i++){
 				TraceItem cur = (TraceItem) instructions.get(i);
+				Processor processor = (Processor) processorsTable.get(cur.coreid);
+				String address = cur.address;
 				if(cur.operationFlag == 0){
 					// Issue a read operation
+					boolean readHitL1 = false;
+					for(int j=0;j<processor.l1.setsList.size();j++){
+						Set set = (Set) processor.l1.setsList.get(j);
+						for(int n=0;n<set.blockList.size();n++){
+							Block block = (Block) set.blockList.get(n);
+							if(block.tag==address){
+								//l1 hit
+								readHitL1 = true;
+								System.out.println("L1 read hit->");
+								//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
+								if(block.state==0){
+									//No node has a copy of the cache block
+									System.out.println("L1 read hit and successfully read a block in L1 cache:"+address);
+								}else if(block.state==1){
+									//Exactly one node has a copy of the block, and it has written the block, so the memory copy is out of date,
+									//The processor is called the owner of the block
+									//check who is the owner, if this node is the owner, then it will cost no latency, but if the owner is a remote node,
+									// put this in the message queue.
+								}else if(block.state==2){
+									//One or more nodes have the block cached, and the value in memory is up to data(as well as in all the caches)
+									System.out.println("L1 read hit and successfully read a block in L1 cache:"+address);
+								}
+							}
+						}
+					}
+					if(readHitL1==false){
+						//add this command to the message queue
+					}
 				}else if(cur.operationFlag == 1){
 					// Issue a write operation
 				}
