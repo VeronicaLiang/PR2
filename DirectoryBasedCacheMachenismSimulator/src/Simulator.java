@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -174,9 +175,7 @@ public class Simulator {
 				item.cycle =Integer.parseInt(ss[0]) ;
 				item.coreid=ss[1];
 				item.operationFlag=Integer.parseInt(ss[2]);
-				item.address=ss[3];
-//				byte [] test = new byte[40];
-//				test = DatatypeConverter.parseHexBinary(ss[3]);
+				item.address=hexToBinary(ss[3].substring(2));
 				boolean ccexist = commands.containsKey(ss[0]);
 				if(ccexist){
 					commands.get(ss[0]).add(item);
@@ -329,6 +328,13 @@ public class Simulator {
 		}
 
 	}
+
+    String hexToBinary(String hex) {
+        String value = new BigInteger(hex, 16).toString(2);
+        String zero_pad = "0";
+        for(int i=1;i<32-value.length();i++) zero_pad = zero_pad + "0";
+        return zero_pad + value;
+    }
 
 	void writeOperation(String cacheLevel, String coreid, String address, int currentclockcycle){
 		boolean writeHit = false;
