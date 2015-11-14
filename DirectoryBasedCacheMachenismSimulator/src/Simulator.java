@@ -51,6 +51,7 @@ public class Simulator {
 	
 	LinkedList writeBuffer = new LinkedList();//Stores the blocks that are going te be flushed back to memory
 	HashMap processorsTable = new HashMap();
+	HashMap<Integer,ArrayList<Message>> messageQueue = new HashMap<Integer,ArrayList<Message>>();
 	
 	Memory memory;
 	/*
@@ -79,8 +80,8 @@ public class Simulator {
 			//execute all the commands in the message queue
 			for(int i=0;i<processorsTable.size();i++){
 		    	Processor processor = (Processor) processorsTable.get(i+"");
-		    	if(processor.messageQueue.containsKey(clockcycle)){
-		    		ArrayList<Message> msgs = processor.messageQueue.get(clockcycle);
+		    	if(messageQueue.containsKey(clockcycle)){
+		    		ArrayList<Message> msgs = messageQueue.get(clockcycle);
 		    		for(int n=0;n<msgs.size();n++){
 		    			//execute all the messages in the message queue
 		    			Message msg = msgs.get(n);
@@ -141,12 +142,12 @@ public class Simulator {
 										message.dataAddress = address;
 										int manhattanDistance = 3;//TODO To calculate manhattan distance
 										int executeCycle = manhattanDistance*C+clockcycle;
-										if(processor.messageQueue.containsKey(executeCycle)){
-											processor.messageQueue.get(executeCycle).add(message);
+										if(messageQueue.containsKey(executeCycle)){
+											messageQueue.get(executeCycle).add(message);
 										}else{
 											ArrayList<Message> al = new ArrayList<Message>();
 											al.add(message);
-											processor.messageQueue.put(executeCycle, al);
+											messageQueue.put(executeCycle, al);
 										}
 										
 									}
@@ -164,12 +165,12 @@ public class Simulator {
 						message.messageType = Message.READ_MISS_L1;
 						message.dataAddress = address;
 						int executeCycle = d+clockcycle;
-						if(processor.messageQueue.containsKey(executeCycle)){
-							processor.messageQueue.get(executeCycle).add(message);
+						if(messageQueue.containsKey(executeCycle)){
+							messageQueue.get(executeCycle).add(message);
 						}else{
 							ArrayList<Message> al = new ArrayList<Message>();
 							al.add(message);
-							processor.messageQueue.put(executeCycle, al);
+							messageQueue.put(executeCycle, al);
 						}
 					}
 				}else if(cur.operationFlag == 1){
@@ -208,12 +209,12 @@ public class Simulator {
 										message.dataAddress = address;
 										int manhattanDistance = 3;//TODO To calculate manhattan distances of every sharers'.
 										int executeCycle = manhattanDistance*C+clockcycle;
-										if(processor.messageQueue.containsKey(executeCycle)){
-											processor.messageQueue.get(executeCycle).add(message);
+										if(messageQueue.containsKey(executeCycle)){
+											messageQueue.get(executeCycle).add(message);
 										}else{
 											ArrayList<Message> al = new ArrayList<Message>();
 											al.add(message);
-											processor.messageQueue.put(executeCycle, al);
+											messageQueue.put(executeCycle, al);
 										}
 										
 									}
@@ -231,12 +232,12 @@ public class Simulator {
 						message.messageType = Message.WRITE_MISS_L1;
 						message.dataAddress = address;
 						int executeCycle = d+clockcycle;
-						if(processor.messageQueue.containsKey(executeCycle)){
-							processor.messageQueue.get(executeCycle).add(message);
+						if(messageQueue.containsKey(executeCycle)){
+							messageQueue.get(executeCycle).add(message);
 						}else{
 							ArrayList<Message> al = new ArrayList<Message>();
 							al.add(message);
-							processor.messageQueue.put(executeCycle, al);
+							messageQueue.put(executeCycle, al);
 						}
 					}
 				}
