@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class Processor {
 	L1 l1;
 	L2 l2;
-	HashMap<Integer,ArrayList<TraceItem>> messageQueue = new HashMap<Integer,ArrayList<TraceItem>>();
+	HashMap<Integer,ArrayList<Message>> messageQueue = new HashMap<Integer,ArrayList<Message>>();
 	Processor(int numberOfSetInL1,int numberOfSetInL2,int associativityOfL1,int associativityOfL2){
 		//Initialize l1 and l2
 		l1 = new L1(numberOfSetInL1,associativityOfL1);

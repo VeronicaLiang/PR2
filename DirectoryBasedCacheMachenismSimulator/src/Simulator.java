@@ -58,7 +58,7 @@ public class Simulator {
 	 * is co-located with tile0, a memory access, which assumed to take d1 cycles(uniform memory access), and a message
 	 * back from the memory controller.
 	 */
-	MemoryController memoryController;
+	//Message memoryController;
 	
 	TLB tlb;
 	
@@ -80,11 +80,19 @@ public class Simulator {
 			for(int i=0;i<processorsTable.size();i++){
 		    	Processor processor = (Processor) processorsTable.get(i+"");
 		    	if(processor.messageQueue.containsKey(clockcycle)){
-		    		ArrayList<TraceItem> msgs = processor.messageQueue.get(clockcycle);
+		    		ArrayList<Message> msgs = processor.messageQueue.get(clockcycle);
 		    		for(int n=0;n<msgs.size();n++){
 		    			//execute all the messages in the message queue
-		    			TraceItem msg = msgs.get(n);
-		    			//TODO
+		    			Message msg = msgs.get(n);
+		    			if(msg.messageType.equals(Message.FATCH)){
+		    				//TODO
+		    			}else if(msg.messageType.equals(Message.INVALIDATE)){
+		    				//TODO
+		    			}else if(msg.messageType.equals(Message.READ_MISS_L1)){
+		    				//TODO
+		    			}else if(msg.messageType.equals(Message.WRITE_MISS_L1)){
+		    				//TODO
+		    			}
 		    		}
 		    	}
 		    }
@@ -110,15 +118,40 @@ public class Simulator {
 								System.out.println("L1 read hit->");
 								//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
 								if(block.state==0){
-									//No node has a copy of the cache block
+									//TODO No node has a copy of the cache block
 									System.out.println("L1 read hit and successfully read a block in L1 cache:"+address);
 								}else if(block.state==1){
 									//Exactly one node has a copy of the block, and it has written the block, so the memory copy is out of date,
 									//The processor is called the owner of the block
 									//check who is the owner, if this node is the owner, then it will cost no latency, but if the owner is a remote node,
 									// put this in the message queue.
+									String ss[] = block.owner.split(":");
+									int nodeid = Integer.parseInt(ss[0]);
+									if(nodeid==Integer.parseInt(cur.coreid)){
+										//The processor is the home node. Read the block
+										System.out.println("L1 read hit and successfully read a block in L1 cache:"+address);
+									}else{
+										int setIndex = Integer.parseInt(ss[1]);
+										int blockIndex = Integer.parseInt(ss[2]);
+										//Send a message to home node to fetch the block that is up to date.
+										Message message = new Message();
+										message.remoteNodeAddress = block.owner;
+										message.homeNodeAddress = cur.coreid+":"+j+":"+n;
+										message.messageType = Message.FATCH;
+										message.dataAddress = address;
+										int manhattanDistance = 3;//TODO To calculate manhattan distance
+										int executeCycle = manhattanDistance*C+clockcycle;
+										if(processor.messageQueue.containsKey(executeCycle)){
+											processor.messageQueue.get(executeCycle).add(message);
+										}else{
+											ArrayList<Message> al = new ArrayList<Message>();
+											al.add(message);
+											processor.messageQueue.put(executeCycle, al);
+										}
+										
+									}
 								}else if(block.state==2){
-									//One or more nodes have the block cached, and the value in memory is up to data(as well as in all the caches)
+									//One or more nodes have the block cached, and the value in memory is up to date(as well as in all the caches)
 									System.out.println("L1 read hit and successfully read a block in L1 cache:"+address);
 								}
 							}
@@ -126,9 +159,86 @@ public class Simulator {
 					}
 					if(readHitL1==false){
 						//add this command to the message queue
+						Message message = new Message();
+						message.homeNodeAddress = cur.coreid;
+						message.messageType = Message.READ_MISS_L1;
+						message.dataAddress = address;
+						int executeCycle = d+clockcycle;
+						if(processor.messageQueue.containsKey(executeCycle)){
+							processor.messageQueue.get(executeCycle).add(message);
+						}else{
+							ArrayList<Message> al = new ArrayList<Message>();
+							al.add(message);
+							processor.messageQueue.put(executeCycle, al);
+						}
 					}
 				}else if(cur.operationFlag == 1){
 					// Issue a write operation
+					boolean writeHitL1 = false;
+					for(int j=0;j<processor.l1.setsList.size();j++){
+						Set set = (Set) processor.l1.setsList.get(j);
+						for(int n=0;n<set.blockList.size();n++){
+							Block block = (Block) set.blockList.get(n);
+							if(block.tag==address){
+								//l1 hit
+								writeHitL1 = true;
+								System.out.println("L1 write hit->");
+								//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
+								if(block.state==0){
+									//TODO No node has a copy of the cache block
+									System.out.println("L1 write hit and successfully write a block in L1 cache:"+address);
+								}else if(block.state==1){
+									//Exactly one node has a copy of the block, and it has written the block, so the memory copy is out of date,
+									//The processor is called the owner of the block
+									//check who is the owner, if this node is the owner, then it will cost no latency, but if the owner is a remote node,
+									// put this in the message queue.
+									String ss[] = block.owner.split(":");
+									int nodeid = Integer.parseInt(ss[0]);
+									if(nodeid==Integer.parseInt(cur.coreid)){
+										//The processor is the home node. Read the block
+										System.out.println("L1 write hit and successfully write a block in L1 cache:"+address);
+									}else{
+										int setIndex = Integer.parseInt(ss[1]);
+										int blockIndex = Integer.parseInt(ss[2]);
+										//TODO Send a message to all the nodes to let them know that one node has changed the block, demand the block's ownership.
+										Message message = new Message();
+										message.remoteNodeAddress = block.owner;
+										message.homeNodeAddress = cur.coreid+":"+j+":"+n;
+										message.messageType = Message.INVALIDATE;
+										message.dataAddress = address;
+										int manhattanDistance = 3;//TODO To calculate manhattan distances of every sharers'.
+										int executeCycle = manhattanDistance*C+clockcycle;
+										if(processor.messageQueue.containsKey(executeCycle)){
+											processor.messageQueue.get(executeCycle).add(message);
+										}else{
+											ArrayList<Message> al = new ArrayList<Message>();
+											al.add(message);
+											processor.messageQueue.put(executeCycle, al);
+										}
+										
+									}
+								}else if(block.state==2){
+									//One or more nodes have the block cached, and the value in memory is up to date(as well as in all the caches)
+									System.out.println("L1 read hit and successfully read a block in L1 cache:"+address);
+								}
+							}
+						}
+					}
+					if(writeHitL1==false){
+						//add this command to the message queue
+						Message message = new Message();
+						message.homeNodeAddress = cur.coreid;
+						message.messageType = Message.WRITE_MISS_L1;
+						message.dataAddress = address;
+						int executeCycle = d+clockcycle;
+						if(processor.messageQueue.containsKey(executeCycle)){
+							processor.messageQueue.get(executeCycle).add(message);
+						}else{
+							ArrayList<Message> al = new ArrayList<Message>();
+							al.add(message);
+							processor.messageQueue.put(executeCycle, al);
+						}
+					}
 				}
 			}
 			clockcycle++;
@@ -171,10 +281,7 @@ public class Simulator {
 	    //Initialize memory=====Need memory to keep ultimate states of a block
 	    memory = Memory.getInstance();
 	    
-	    tlb = TLB.getInstance();
-	    
-//	    ArrayList traceList = new ArrayList();
-	  //TODO load benchmarks, run and trace all the states
+	  // load benchmarks, run and trace all the states
 	    String line = null;
 		// Use a hashtable to record all commands from the trace file. The key is the clock cycle, so that in each cycle
 		// the commands that need to operate can be easily extracted.
@@ -209,92 +316,6 @@ public class Simulator {
 			e.printStackTrace();
 		}
 		return commands;
-
-
-
-//		for(int i = 0;i<traceList.size();i++){
-//			TraceItem item = (TraceItem) traceList.get(i);
-//			String coreid = item.coreid;
-//			int operationFlag = item.operationFlag;
-//			Processor processor = (Processor) processorsTable.get(coreid);
-//			String address = item.address;
-//			System.out.println("Start to look the block up in the processor's l1->"+"  -");
-//			//Look the block up in the processor's l1
-//			boolean isL1Hit = false;
-//			for(int j=0;j<processor.l1.setsList.size();j++){
-//				Set set = (Set) processor.l1.setsList.get(j);
-//				for(int n=0;n<set.blockList.size();n++){
-//					Block b = (Block) set.blockList.get(n);
-//					if(b.tag==address){
-//						//l1 hit
-//						isL1Hit = true;
-//						System.out.println("Get a l1 hit->"+"  -");
-//						//check the block's state and owner
-//						//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
-//						if(b.state==0){
-//
-//						}else if(b.state==1){
-//
-//						}else if(b.state==2){
-//
-//						}
-//					}
-//				}
-//			}
-//			boolean isL2Hit = false;
-//			if(isL1Hit==false){
-//				//Look the block up in the processor's l2
-//				for(int j=0;j<processor.l2.setsList.size();j++){
-//					Set set = (Set) processor.l2.setsList.get(j);
-//					for(int n=0;n<set.blockList.size();n++){
-//						Block b = (Block) set.blockList.get(n);
-//						if(b.tag==address){
-//							//l2 hit
-//							isL1Hit = true;
-//							System.out.println("Get a l2 hit->"+"  -");
-//							//check the block's state and owner
-//							//MSI when state==0 then state-> invalid, when state==1 then state-> modified, when state==2 then state->shared
-//							if(b.state==0){
-//
-//							}else if(b.state==1){
-//
-//							}else if(b.state==2){
-//
-//							}
-//						}
-//					}
-//				}
-//			}
-//			if(isL2Hit==false && isL1Hit==false){
-//				//Load from memeory
-//				System.out.println("Load from memeory and start count latency cycles->"+"  -");
-//			}
-//			if(operationFlag==0){//read operation
-//				//TODO TODO
-//				//Get the virtual address() through TLB
-//				if(tlb.isAvailableInTLB(address)){//virtual address==cache flag:set index:block index
-//					String virtualAddress = tlb.getVirtualAddress(address);
-//					String indexes[] = virtualAddress.split(":");
-//					int cacheFlag = Integer.parseInt(indexes[0]);
-//					int setIndex = Integer.parseInt(indexes[1]);
-//					int blockIndex = Integer.parseInt(indexes[2]);
-//					
-//				}else{
-//					String virtualAddress = tlb.translatePhysicalToVirtual(address, processor);
-//					String indexes[] = virtualAddress.split(":");
-//					int cacheFlag = Integer.parseInt(indexes[0]);
-//					int setIndex = Integer.parseInt(indexes[1]);
-//					int blockIndex = Integer.parseInt(indexes[2]);
-//				}
-				//First read from l1
-//				
-//			}else if(operationFlag==1){//write operation
-//				//TODO TODO
-//			}else{
-//				
-//			}
-//
-//		}
 	}
 
 	void readOperation(TraceItem op){
