@@ -10,6 +10,8 @@ public class Message {
 	
 	final static String FATCH = "fatch";
 	final static String READ_MISS_L1 = "readmissl1";
-	final static String INVALIDATE = "invalidate";
+	final static String READ_INVALIDATE = "readinvalidate";
 	final static String WRITE_MISS_L1 = "writemissl1";
+	
+	final static String WRITE_INVALIDATE = "writeinvalidate";
 }
