@@ -115,7 +115,7 @@ public class Simulator {
 				if(cur.operationFlag == 0){
 					// Issue a read operation
 					//readOperation(String cacheLevel, String coreid, String address, int currentclockcycle)
-    				readOperation("L2",cur.coreid,address,clockcycle);
+    				readOperation("L1",cur.coreid,address,clockcycle);
 				}else if(cur.operationFlag == 1){
 					// Issue a write operation
 					writeOperation("L1", cur.coreid,address, clockcycle);
@@ -200,6 +200,17 @@ public class Simulator {
 		// Issue a read operation
 		Processor processor = (Processor) processorsTable.get(coreid);
 		boolean readHit = false;
+        int l2indexbit = (int) (Math.log(p)/Math.log(2));
+        boolean l1readHit = readHit(address,processor,n1,a1,b,0, "l1");
+        boolean l2readHit = readHit(address,processor,n1,a1,b,l2indexbit, "l2");
+        if(l1readHit){
+
+        }else if (l2readHit){
+
+        }else{
+
+        }
+
 		LinkedList<Set> setsList = new LinkedList<Set>();
 		if(cacheLevel.equals("L1")){
 			setsList = processor.l1.setsList;
@@ -329,6 +340,31 @@ public class Simulator {
 
 	}
 
+    Boolean readHit(String add, Processor pro, int n, int a, int b, int l2index,String l){
+        boolean hit = false;
+        int setindexbit = n-a-b-l2index;
+        int assobit = a;
+        String setloc = add.substring(32-setindexbit-12,20-l2index);
+        String assoloc = add.substring(32-setindexbit-assobit-12,32-setindexbit-12);
+        Block cached = new Block();
+        if(l == "l1") {
+            cached = pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(Integer.parseInt(assoloc, 2));
+        }else if (l == "l2"){
+            String l2id = add.substring(19-l2index+1, 20);
+            Processor home = (Processor) processorsTable.get(l2id);
+            cached = home.l2.setsList.get(Integer.parseInt(setloc,2)).blockList.get(Integer.parseInt(assoloc, 2));
+        }
+
+        if(cached.tag == add.substring(0,32-setindexbit-assobit-12+1)){
+            if (cached.data == 0) {
+                // no cache, a read-miss
+            }else{
+                hit = true;
+            }
+        }
+
+        return hit;
+    }
     String hexToBinary(String hex) {
         String value = new BigInteger(hex, 16).toString(2);
         String zero_pad = "0";

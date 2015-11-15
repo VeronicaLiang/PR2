@@ -11,5 +11,5 @@ public class Processor {
 		l1 = new L1(numberOfSetInL1,associativityOfL1);
 		l2 = new L2(numberOfSetInL2,associativityOfL2);
 	}
-	
+
 }
