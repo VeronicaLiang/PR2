@@ -3,7 +3,7 @@
  * 
  */
 public class Message {
-	String localNote;
+	String localNode;
 	String remoteNode;
 	String homeNode;
 	String messageType;

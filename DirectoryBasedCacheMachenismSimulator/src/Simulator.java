@@ -99,7 +99,7 @@ public class Simulator {
 		    					message.homeNode = msg.homeNode;
 		    					message.messageType = Message.DATA_IN_REMOTE;
 		    					message.dataAddress = address;
-		    					message.localNote = msg.localNote;
+		    					message.localNode = msg.localNode;
 		    					message.remoteNode = processor.l2.directory.blocktable.get(address).owner;
 		    					int manhattanDistance = 3;//TODO To calculate manhattan distance
 	        					int executeCycle = clockcycle+manhattanDistance;
@@ -116,7 +116,7 @@ public class Simulator {
 	        					message.homeNode = msg.homeNode;
 	        					message.messageType = Message.DATA_VALUE_REPLY;
 	        					message.dataAddress = address;
-	        					message.localNote = msg.localNote;
+	        					message.localNode = msg.localNode;
 	        					message.remoteNode = msg.remoteNode;
 	        					int manhattanDistance = 3;//TODO To calculate manhattan distance
 	        					int executeCycle = clockcycle+manhattanDistance;
@@ -134,7 +134,7 @@ public class Simulator {
 	    					message.homeNode = msg.homeNode;
 	    					message.messageType = Message.FETCH_DATA_MEMORY;
 	    					message.dataAddress = address;
-	    					message.localNote = msg.localNote;
+	    					message.localNode = msg.localNode;
 	    					int executeCycle = clockcycle+d1;
 	    					if(messageQueue.containsKey(executeCycle)){
 	    						messageQueue.get(executeCycle).add(message);
@@ -153,22 +153,22 @@ public class Simulator {
     					if(processor.l2.directory.blocktable.contains(address)){
 	    					//if the home node has the block, then check its state and add the requesting node as a sharer
     						processor.l2.directory.blocktable.get(address).state = Directory.SHARED_STATE;
-    						processor.l2.directory.blocktable.get(address).sharers.add(msg.localNote);
+    						processor.l2.directory.blocktable.get(address).sharers.add(msg.localNode);
 	    				}else{
 	    					OwnerAndSharers os = new OwnerAndSharers();
 	    					os.state=Directory.SHARED_STATE;
-	    					os.sharers.add(msg.localNote);
+	    					os.sharers.add(msg.localNode);
 	    					processor.l2.directory.blocktable.put(address, os);
 	    				}
     					//send the newly fetched block to the requesting node
-    					if(msg.homeNode.equals(msg.localNote)){
+    					if(msg.homeNode.equals(msg.localNode)){
     						//store the block into l2 and l1? TODO 
     					}else{
     						Message message = new Message();
         					message.homeNode = msg.homeNode;
         					message.messageType = Message.DATA_VALUE_REPLY;
         					message.dataAddress = address;
-        					message.localNote = msg.localNote;
+        					message.localNode = msg.localNode;
         					int manhattanDistance = 3;//TODO To calculate manhattan distance
         					int executeCycle = clockcycle+manhattanDistance;
         					if(messageQueue.containsKey(executeCycle)){
@@ -181,17 +181,17 @@ public class Simulator {
     					}
     					
 	    			}else if(msg.messageType.equals(Message.DATA_VALUE_REPLY)){
-	    				String coreid = msg.localNote;
+	    				String coreid = msg.localNode;
 	    				Processor processor = (Processor) processorsTable.get(coreid);
     					//put it into l2 cache in the home node, change the its state to shared.
     					if(processor.l2.directory.blocktable.contains(address)){
 	    					//if the home node has the block, then check its state and add the requesting node as a sharer
     						processor.l2.directory.blocktable.get(address).state = Directory.SHARED_STATE;
-    						processor.l2.directory.blocktable.get(address).sharers.add(msg.localNote);
+    						processor.l2.directory.blocktable.get(address).sharers.add(msg.localNode);
 	    				}else{
 	    					OwnerAndSharers os = new OwnerAndSharers();
 	    					os.state=Directory.SHARED_STATE;
-	    					os.sharers.add(msg.localNote);
+	    					os.sharers.add(msg.localNode);
 	    					processor.l2.directory.blocktable.put(address, os);
 	    				}
     					//store the block into l2 and l1? TODO
@@ -202,7 +202,7 @@ public class Simulator {
     					message.homeNode = msg.homeNode;
     					message.messageType = Message.MODIFIED_DATA_REMOTE;
     					message.dataAddress = address;
-    					message.localNote = msg.localNote;
+    					message.localNode = msg.localNode;
     					message.remoteNode = msg.remoteNode;
     					int manhattanDistance = 3;//TODO To calculate manhattan distance
     					int executeCycle = clockcycle+manhattanDistance;
@@ -227,7 +227,7 @@ public class Simulator {
     					message.homeNode = msg.homeNode;
     					message.messageType = Message.DATA_VALUE_REPLY;
     					message.dataAddress = address;
-    					message.localNote = msg.localNote;
+    					message.localNode = msg.localNode;
     					message.remoteNode = msg.remoteNode;
     					int manhattanDistance = 3;//TODO To calculate manhattan distance
     					int executeCycle = clockcycle+manhattanDistance;
@@ -243,7 +243,7 @@ public class Simulator {
     					message1.homeNode = msg.homeNode;
     					message1.messageType = Message.DATA_VALUE_REPLY;
     					message1.dataAddress = address;
-    					message1.localNote = msg.homeNode;
+    					message1.localNode = msg.homeNode;
     					message1.remoteNode = msg.remoteNode;
     					int manhattanDistance1 = 3;//TODO To calculate manhattan distance
     					int executeCycle1 = clockcycle+manhattanDistance;
@@ -259,13 +259,13 @@ public class Simulator {
 	    				String coreid = msg.homeNode;
 	    				Processor processor = (Processor) processorsTable.get(coreid);
 	    				processor.l2.directory.blocktable.get(address).state=Directory.MODIFIED_STATE;
-	    				processor.l2.directory.blocktable.get(address).owner = msg.localNote;
+	    				processor.l2.directory.blocktable.get(address).owner = msg.localNode;
 	    				//the home node sends a message with all the sharers to the requesting node
 	    				Message message1 = new Message();
     					message1.homeNode = msg.homeNode;
     					message1.messageType = Message.WRITE_GRANTED;
     					message1.dataAddress = address;
-    					message1.localNote = msg.localNote;
+    					message1.localNode = msg.localNode;
     					
     					int manhattanDistance = 3;//TODO To calculate manhattan distance
     					int executeCycle = clockcycle+manhattanDistance;
@@ -278,7 +278,7 @@ public class Simulator {
     					}
 	    			}else if(msg.messageType.equals(Message.WRITE_REQUEST)){
 	    				//change the local block's state to modified
-	    				String coreid = msg.localNote;
+	    				String coreid = msg.localNode;
 	    				Processor processor = (Processor) processorsTable.get(coreid);
 	    				processor.l2.directory.blocktable.get(address).state=Directory.MODIFIED_STATE;
 	    				
@@ -289,7 +289,7 @@ public class Simulator {
 	    					message1.homeNode = msg.homeNode;
 	    					message1.messageType = Message.INVALIDATE_NOTE;
 	    					message1.dataAddress = address;
-	    					message1.localNote = msg.localNote;
+	    					message1.localNode = msg.localNode;
 	    					message1.remoteNode = processor.l2.directory.blocktable.get(address).sharers.get(n);
 	    					int manhattanDistance = 3;//TODO To calculate manhattan distance
 	    					int executeCycle = clockcycle+manhattanDistance;
@@ -431,7 +431,7 @@ public class Simulator {
     				message.messageType = Message.READ_MISS_L2;
         		}
 				message.dataAddress = address;
-				message.localNote = coreid;
+				message.localNode = coreid;
 				int manhattanDistance = 3;//TODO To calculate manhattan distance
 				int executeCycle = manhattanDistance*C+currentclockcycle;
 				if(messageQueue.containsKey(executeCycle)){
@@ -451,7 +451,7 @@ public class Simulator {
 			message.homeNode = homecoreid;
 			message.messageType = Message.READ_MISS;
 			message.dataAddress = address;
-			message.localNote = coreid;
+			message.localNode = coreid;
 			int manhattanDistance = 3;//TODO To calculate manhattan distance
 			int executeCycle = manhattanDistance*C+currentclockcycle;
 			if(messageQueue.containsKey(executeCycle)){
@@ -518,7 +518,7 @@ public class Simulator {
 				message.homeNode = homecoreid;
 				message.messageType = Message.WRITE_REQUEST;
 				message.dataAddress = address;
-				message.localNote = coreid;
+				message.localNode = coreid;
 				int manhattanDistance = 3;// TODO To calculate manhattan distance
 				int executeCycle = manhattanDistance * C + currentclockcycle;
 				if (messageQueue.containsKey(executeCycle)) {
@@ -538,7 +538,7 @@ public class Simulator {
 			message.homeNode = homecoreid;
 			message.messageType = Message.WRITE_REQUEST;
 			message.dataAddress = address;
-			message.localNote = coreid;
+			message.localNode = coreid;
 			int manhattanDistance = 3;// TODO To calculate manhattan distance
 			int executeCycle = manhattanDistance * C + currentclockcycle;
 			if (messageQueue.containsKey(executeCycle)) {
