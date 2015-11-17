@@ -7,7 +7,7 @@ public class L2 {
 	/*
 	 * L2's Directory
 	 */
-	Directory directory;
+	Directory directory = new Directory();
 	LinkedList<Set> setsList = new LinkedList();
 	L2(int numberOfSetInL2,int associativity){
 		//Initialize the sets in the cache
