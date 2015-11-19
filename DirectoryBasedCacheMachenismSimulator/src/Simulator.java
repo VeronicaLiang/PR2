@@ -91,7 +91,7 @@ public class Simulator {
 					Message msg = msgs.get(i);
 					String address = msg.dataAddress;
 
-					if (msg.messageType.equals(Message.READ_MISS_L1)) {
+					if (msg.messageType.equals(Message.MISS_L1)) {
 						// l1 miss, check whether the home has the block or not
 						String coreid = msg.homeNode;
 						Processor processor = (Processor) processorsTable.get(coreid);
@@ -99,8 +99,7 @@ public class Simulator {
 							// if the home node has the block, then check its
 							// state
 							if (processor.l2.directory.blocktable.get(address).state == 1) {
-								// read miss, and block is exclusive in another
-								// cache
+								// miss, and block is exclusive in another cache
 								// one remote has the block modified. send a
 								// message to request modified value
 								Message message = new Message();
@@ -109,6 +108,7 @@ public class Simulator {
 								message.dataAddress = address;
 								message.localNode = msg.localNode;
 								message.remoteNode = processor.l2.directory.blocktable.get(address).owner;
+								message.blockStatus = msg.blockStatus;
 								int manhattanDistance = getManhattanDistance(coreid, msg.localNode, p);
 								int executeCycle = clockcycle + manhattanDistance * C;
 								if (messageQueue.containsKey(executeCycle)) {
@@ -121,15 +121,21 @@ public class Simulator {
 								System.out.println(coreid + ": L2 Hit, but block is exclusive,"
 										+ " return Remote node id to " + msg.localNode + ". This is a small message.");
 							} else {
-								// read miss, and block is shared
+								// miss, and block is shared
 								// if the state of the block is either shared or
 								// modified, send it to the requesting node.
 								Message message = new Message();
 								message.homeNode = msg.homeNode;
-								message.messageType = Message.DATA_VALUE_REPLY;
+								if (msg.blockStatus == Directory.SHARED_STATE) {
+									message.messageType = Message.DATA_VALUE_REPLY;
+								} else {
+									message.messageType = Message.WRITE_REQUEST;
+								}
+								message.hit = msg.hit;
 								message.dataAddress = address;
 								message.localNode = msg.localNode;
 								message.remoteNode = msg.remoteNode;
+								message.blockStatus = msg.blockStatus;
 								int manhattanDistance = getManhattanDistance(coreid, msg.localNode, p);
 								int executeCycle = clockcycle + manhattanDistance * C + d;
 								if (messageQueue.containsKey(executeCycle)) {
@@ -144,7 +150,7 @@ public class Simulator {
 										+ msg.localNode + ". This is a large message.");
 							}
 						} else {
-							// read miss, and block is uncached
+							// miss, and block is uncached
 							// if the home node does not have the block, then
 							// send message to tail 0 to fetch data
 							Message message = new Message();
@@ -152,6 +158,7 @@ public class Simulator {
 							message.messageType = Message.FETCH_DATA_FROM_MEM_CTRL;
 							message.dataAddress = address;
 							message.localNode = msg.localNode;
+							message.blockStatus = msg.blockStatus;
 							int manhattanDistance = getManhattanDistance(msg.homeNode, "0", p);
 							int executeCycle = clockcycle + manhattanDistance * C;
 							if (messageQueue.containsKey(executeCycle)) {
@@ -173,6 +180,7 @@ public class Simulator {
 						message.messageType = Message.RETURN_DATA_FROM_MEM_CTRL;
 						message.dataAddress = address;
 						message.localNode = msg.localNode;
+						message.blockStatus = msg.blockStatus;
 						int manhattanDistance = getManhattanDistance(msg.homeNode, "0", p);
 						int executeCycle = clockcycle + manhattanDistance * C + d1;
 						if (messageQueue.containsKey(executeCycle)) {
@@ -197,6 +205,7 @@ public class Simulator {
 						message.dataAddress = address;
 						message.localNode = msg.localNode;
 						message.remoteNode = msg.remoteNode;
+						message.blockStatus = msg.blockStatus;
 						int manhattanDistance = getManhattanDistance(msg.homeNode, msg.localNode, p);
 						int executeCycle = clockcycle + manhattanDistance * C;
 						if (messageQueue.containsKey(executeCycle)) {
@@ -210,10 +219,18 @@ public class Simulator {
 						Processor processor = (Processor) processorsTable.get(coreid);
 						storeBlockToCache(); // store the block into l2, no need
 												// to set status for l2
-						processor.l2.directory.blocktable.get(address).state = Directory.SHARED_STATE;
-						System.out.println(
-								msg.homeNode + ": Get data from 0, save to L2," + " set directory status to shared,"
-										+ " and return to " + msg.localNode + ". This is a large message.");
+						processor.l2.directory.blocktable.get(address).state = msg.blockStatus;
+
+						if (msg.blockStatus == Directory.SHARED_STATE) {
+							System.out.println(
+									msg.homeNode + ": Get data from 0, save to L2," + " set directory status to shared,"
+											+ " and return to " + msg.localNode + ". This is a large message.");
+						} else {
+							// TODO need add owner here
+							System.out.println(msg.homeNode + ": Get data from 0, save to L2,"
+									+ " set directory status to exclusive," + " and return to " + msg.localNode
+									+ ". This is a large message.");
+						}
 
 					} else if (msg.messageType.equals(Message.DATA_VALUE_REPLY)) {
 						// Local node get data, then write data into l1, and set
@@ -221,9 +238,16 @@ public class Simulator {
 						String coreid = msg.localNode;
 						Processor processor = (Processor) processorsTable.get(coreid);
 						storeBlockToCache(); // store the block into l1
-						setBlockStatus(); // set state of block to shared
-						System.out.println(
-								coreid + ": Get data from " + msg.homeNode + ", save to L1, set status to shared.");
+						setBlockStatus(msg.blockStatus); // set state of block
+															// to
+															// msg.blockStatus
+						if (msg.blockStatus == Directory.SHARED_STATE) {
+							System.out.println(
+									coreid + ": Get data from " + msg.homeNode + ", save to L1, set status to shared.");
+						} else {
+							System.out.println(coreid + ": Get data from " + msg.homeNode
+									+ ", save to L1, set status to exclusive.");
+						}
 
 					} else if (msg.messageType.equals(Message.DATA_IN_REMOTE)) {
 						// the local node has to send a message to a remote node
@@ -234,6 +258,7 @@ public class Simulator {
 						message.dataAddress = address;
 						message.localNode = msg.localNode;
 						message.remoteNode = msg.remoteNode;
+						message.blockStatus = msg.blockStatus;
 						int manhattanDistance = getManhattanDistance(msg.localNode, msg.remoteNode, p);
 						int executeCycle = clockcycle + manhattanDistance * C;
 						if (messageQueue.containsKey(executeCycle)) {
@@ -256,6 +281,7 @@ public class Simulator {
 						message.dataAddress = address;
 						message.localNode = msg.localNode;
 						message.remoteNode = msg.remoteNode;
+						message.blockStatus = msg.blockStatus;
 						int manhattanDistance = getManhattanDistance(msg.localNode, msg.remoteNode, p);
 						int executeCycle = clockcycle + manhattanDistance * C;
 						if (messageQueue.containsKey(executeCycle)) {
@@ -265,16 +291,30 @@ public class Simulator {
 							al.add(message);
 							messageQueue.put(executeCycle, al);
 						}
-						setBlockStatus(); // set state of block to shared
-						System.out.println(msg.remoteNode + ": Get data and send to Local Node:" + msg.localNode
-								+ ". This is a large message.");
+
+						if (msg.blockStatus == Directory.SHARED_STATE) {
+							setBlockStatus(msg.blockStatus); // set state of
+																// block
+							// to
+							// msg.blockStatus
+							System.out.println(msg.remoteNode + ": Get data and send to Local Node:" + msg.localNode
+									+ ". This is a large message.");
+						} else {
+							setBlockStatus(Directory.INVALID_STATE); // set
+																		// state
+																		// of
+																		// block
+							System.out.println(msg.remoteNode + ": Get data and send to Local Node:" + msg.localNode
+									+ ", set block status to invalid. This is a large message.");
+						}
 
 						Message message1 = new Message();
 						message1.homeNode = msg.homeNode;
-						message1.messageType = Message.SET_STATUS_TO_SHARED;
+						message1.messageType = Message.SET_DIR_STATUS;
 						message1.dataAddress = address;
 						message1.localNode = msg.homeNode;
 						message1.remoteNode = msg.remoteNode;
+						message1.blockStatus = msg.blockStatus;
 						int manhattanDistance1 = getManhattanDistance(msg.homeNode, msg.remoteNode, p);
 						int executeCycle1 = clockcycle + manhattanDistance1 * C;
 						if (messageQueue.containsKey(executeCycle1)) {
@@ -286,11 +326,16 @@ public class Simulator {
 						}
 						System.out.println(msg.remoteNode + ": Send request to Home:" + msg.homeNode
 								+ " to change the status of directory to shared. This is a small message.");
-					} else if (msg.messageType.equals(Message.SET_STATUS_TO_SHARED)) {
+					} else if (msg.messageType.equals(Message.SET_DIR_STATUS)) {
 						String coreid = msg.homeNode;
 						Processor processor = (Processor) processorsTable.get(coreid);
-						processor.l2.directory.blocktable.get(address).state = Directory.SHARED_STATE;
-						System.out.println(coreid + ": Set state of block to shared in directory.");
+						processor.l2.directory.blocktable.get(address).state = msg.blockStatus;
+						if (msg.blockStatus == Directory.SHARED_STATE) {
+							System.out.println(coreid + ": Set state of block to shared in directory.");
+						} else {
+							// TODO change owner to local node
+							System.out.println(coreid + ": Set state of block to exclusive in directory.");
+						}
 
 					} else if (msg.messageType.equals(Message.WRITE_REQUEST)) {
 						// the home node change the block's owner to the
@@ -307,6 +352,7 @@ public class Simulator {
 						message.messageType = Message.WRITE_GRANTED;
 						message.dataAddress = address;
 						message.localNode = msg.localNode;
+						message.blockStatus = msg.blockStatus;
 						message.sharers = processor.l2.directory.blocktable.get(address).sharers;
 
 						int manhattanDistance = getManhattanDistance(msg.homeNode, msg.localNode, p);
@@ -321,9 +367,15 @@ public class Simulator {
 						// if we can update data now, uncomment following line
 						// or we have to update cache at the end
 						// storeBlockToCache();
-
-						System.out.println(coreid + ": Return sharers list to local node, and set state to exclusive."
-								+ " This is a small message.");
+						if (msg.hit) {
+							System.out
+									.println(coreid + ": Return sharers list to local node, and set state to exclusive."
+											+ " This is a small message.");
+						} else {
+							System.out.println(
+									coreid + ": Return sharers list and data to local node, and set state to exclusive."
+											+ " This is a large message.");
+						}
 
 					} else if (msg.messageType.equals(Message.WRITE_GRANTED)) {
 						// change the local block's state to modified
@@ -348,89 +400,18 @@ public class Simulator {
 							}
 						}
 
-						setBlockStatus(); // set local block status to exclusive
+						setBlockStatus(msg.blockStatus); // set local block
+															// status to
+															// exclusive
 						System.out.println(coreid + ": sends invalidating messages to each sharers."
 								+ " This is a small message.");
 
 					} else if (msg.messageType.equals(Message.INVALIDATE_NOTE)) {
 						// change the local block's state to modified
 						String coreid = msg.remoteNode;
-						setBlockStatus(); // set local block status to exclusive
+						setBlockStatus(msg.blockStatus); // set local block
+															// status to invalid
 						System.out.println(coreid + ": Set state of block to invalid.");
-					} else if (msg.messageType.equals(Message.WRITE_MISS_L1)) {
-						// l1 miss, check whether the home has the block or not
-						String coreid = msg.homeNode;
-						Processor processor = (Processor) processorsTable.get(coreid);
-						if (processor.l2.directory.blocktable.contains(address)) {
-							// if the home node has the block, then check its
-							// state
-							if (processor.l2.directory.blocktable.get(address).state == 1) {
-								// read miss, and block is exclusive in another
-								// cache
-								// one remote has the block modified. send a
-								// message to request modified value
-								Message message = new Message();
-								message.homeNode = msg.homeNode;
-								message.messageType = Message.WRITE_DATA_IN_REMOTE;
-								message.dataAddress = address;
-								message.localNode = msg.localNode;
-								message.remoteNode = processor.l2.directory.blocktable.get(address).owner;
-								int manhattanDistance = getManhattanDistance(coreid, msg.localNode, p);
-								int executeCycle = clockcycle + manhattanDistance * C;
-								if (messageQueue.containsKey(executeCycle)) {
-									messageQueue.get(executeCycle).add(message);
-								} else {
-									ArrayList<Message> al = new ArrayList<Message>();
-									al.add(message);
-									messageQueue.put(executeCycle, al);
-								}
-								System.out.println(coreid + ": L2 Hit, but block is exclusive,"
-										+ " return Remote node id to " + msg.localNode + ". This is a small message.");
-							} else {
-								// read miss, and block is shared
-								// if the state of the block is either shared or
-								// modified, send it to the requesting node.
-								Message message = new Message();
-								message.homeNode = msg.homeNode;
-								message.messageType = Message.DATA_VALUE_REPLY;
-								message.dataAddress = address;
-								message.localNode = msg.localNode;
-								message.remoteNode = msg.remoteNode;
-								int manhattanDistance = getManhattanDistance(coreid, msg.localNode, p);
-								int executeCycle = clockcycle + manhattanDistance * C + d;
-								if (messageQueue.containsKey(executeCycle)) {
-									messageQueue.get(executeCycle).add(message);
-								} else {
-									ArrayList<Message> al = new ArrayList<Message>();
-									al.add(message);
-									messageQueue.put(executeCycle, al);
-								}
-								processor.l2.directory.blocktable.get(address).state = Directory.SHARED_STATE;
-								System.out.println(coreid + ": L2 Hit, and block is shared, return data to "
-										+ msg.localNode + ". This is a large message.");
-							}
-						} else {
-							// read miss, and block is uncached
-							// if the home node does not have the block, then
-							// send message to tail 0 to fetch data
-							Message message = new Message();
-							message.homeNode = msg.homeNode;
-							message.messageType = Message.FETCH_DATA_FROM_MEM_CTRL;
-							message.dataAddress = address;
-							message.localNode = msg.localNode;
-							int manhattanDistance = getManhattanDistance(msg.homeNode, "0", p);
-							int executeCycle = clockcycle + manhattanDistance * C;
-							if (messageQueue.containsKey(executeCycle)) {
-								messageQueue.get(executeCycle).add(message);
-							} else {
-								ArrayList<Message> al = new ArrayList<Message>();
-								al.add(message);
-								messageQueue.put(executeCycle, al);
-							}
-
-							System.out.println(coreid + ": L2 miss, send a request to Memory Controller to "
-									+ " fetch data from memory. This is a small message.");
-						}
 					}
 				}
 			}
@@ -464,7 +445,7 @@ public class Simulator {
 		return 0;
 	}
 
-	void setBlockStatus() {
+	void setBlockStatus(int blockStatus) {
 		// TODO set state of block in node to some state
 	}
 
@@ -557,9 +538,10 @@ public class Simulator {
 			Message message = new Message();
 			String homecoreid = address.substring(19 - l2indexbit + 1, 20);
 			message.homeNode = homecoreid;
-			message.messageType = Message.READ_MISS_L1;
+			message.messageType = Message.MISS_L1;
 			message.dataAddress = address;
 			message.localNode = coreid;
+			message.blockStatus = Directory.SHARED_STATE;
 			int manhattanDistance = getManhattanDistance(coreid, homecoreid, p);
 			int executeCycle = manhattanDistance * C + currentclockcycle;
 			if (messageQueue.containsKey(executeCycle)) {
@@ -633,6 +615,8 @@ public class Simulator {
 				message.messageType = Message.WRITE_REQUEST;
 				message.dataAddress = address;
 				message.localNode = coreid;
+				message.blockStatus = Directory.MODIFIED_STATE;
+				message.hit = true;
 				int manhattanDistance = getManhattanDistance(coreid, homecoreid, p);
 				int executeCycle = manhattanDistance * C + currentclockcycle;
 				if (messageQueue.containsKey(executeCycle)) {
@@ -653,9 +637,11 @@ public class Simulator {
 			Message message = new Message();
 			String homecoreid = address.substring(19 - l2indexbit + 1, 20);
 			message.homeNode = homecoreid;
-			message.messageType = Message.WRITE_MISS_L1;
+			message.messageType = Message.MISS_L1;
 			message.dataAddress = address;
 			message.localNode = coreid;
+			message.blockStatus = Directory.MODIFIED_STATE;
+			message.hit = false;
 			int manhattanDistance = getManhattanDistance(coreid, homecoreid, p);
 			int executeCycle = manhattanDistance * C + currentclockcycle;
 			if (messageQueue.containsKey(executeCycle)) {
