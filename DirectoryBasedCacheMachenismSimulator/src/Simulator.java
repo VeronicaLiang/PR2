@@ -556,9 +556,17 @@ public class Simulator {
 		}
 	}
 
-	// TODO finish manhattan distance
+    // TODO check whether this calculation is correct
 	int getManhattanDistance(String coreid, String homecoreid, int p) {
-		return 0;
+		int edge = (int) Math.pow(2, p/2);
+        int core_x = Integer.parseInt(coreid)/edge;
+        int core_y = Integer.parseInt(coreid)%edge;
+        int home_x = Integer.parseInt(homecoreid)/edge;
+        int home_y = Integer.parseInt(homecoreid)%edge;
+
+        int dist = Math.abs(core_x - core_y) + Math.abs(home_x - home_y);
+
+		return dist;
 	}
 
 	// TODO I change the method name to hit or miss
