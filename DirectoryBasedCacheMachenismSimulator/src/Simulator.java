@@ -325,12 +325,13 @@ public class Simulator {
 							messageQueue.put(executeCycle, al);
 						}
 						System.out.println(msg.remoteNode + ": Send request to Home:" + msg.homeNode
-								+ " to change the status of directory to shared. This is a small message.");
+								+ " to change the status of directory to shared. This is a large message.");
 					} else if (msg.messageType.equals(Message.SET_DIR_STATUS)) {
 						String coreid = msg.homeNode;
 						Processor processor = (Processor) processorsTable.get(coreid);
 						processor.l2.directory.blocktable.get(address).state = msg.blockStatus;
 						if (msg.blockStatus == Directory.SHARED_STATE) {
+							storeBlockToCache();
 							System.out.println(coreid + ": Set state of block to shared in directory.");
 						} else {
 							// TODO change owner to local node
