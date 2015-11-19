@@ -1,3 +1,4 @@
+/tracefile
 /Block.class
 /Directory.class
 /L1.class
@@ -11,4 +12,3 @@
 /Simulator.class
 /TLB.class
 /TraceItem.class
-/tracefile
