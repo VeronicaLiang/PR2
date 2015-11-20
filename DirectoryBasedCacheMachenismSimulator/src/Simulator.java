@@ -384,21 +384,24 @@ public class Simulator {
 
 						// send invalidating messages to each sharers.
 						for (int n = 0; n < msg.sharers.size(); n++) {
-							Message message1 = new Message();
-							message1.homeNode = msg.homeNode;
-							message1.messageType = Message.INVALIDATE_NOTE;
-							message1.dataAddress = address;
-							message1.localNode = msg.localNode;
-							message1.remoteNode = msg.sharers.get(n);
-							int manhattanDistance = getManhattanDistance(msg.remoteNode, msg.localNode, p);
-							int executeCycle = clockcycle + manhattanDistance * C;
-							if (messageQueue.containsKey(executeCycle)) {
-								messageQueue.get(executeCycle).add(message1);
-							} else {
-								ArrayList<Message> al = new ArrayList<Message>();
-								al.add(message1);
-								messageQueue.put(executeCycle, al);
+							if (!msg.sharers.get(n).equals(msg.localNode)){
+								Message message1 = new Message();
+								message1.homeNode = msg.homeNode;
+								message1.messageType = Message.INVALIDATE_NOTE;
+								message1.dataAddress = address;
+								message1.localNode = msg.localNode;
+								message1.remoteNode = msg.sharers.get(n);
+								int manhattanDistance = getManhattanDistance(msg.remoteNode, msg.localNode, p);
+								int executeCycle = clockcycle + manhattanDistance * C;
+								if (messageQueue.containsKey(executeCycle)) {
+									messageQueue.get(executeCycle).add(message1);
+								} else {
+									ArrayList<Message> al = new ArrayList<Message>();
+									al.add(message1);
+									messageQueue.put(executeCycle, al);
+								}
 							}
+							
 						}
 
 						setBlockStatus(msg.blockStatus); // set local block
