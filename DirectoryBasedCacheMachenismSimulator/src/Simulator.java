@@ -534,7 +534,7 @@ public class Simulator {
 		// Issue a read operation
 		Processor processor = (Processor) processorsTable.get(coreid);
 		int l2indexbit = (int) (Math.log(p) / Math.log(2));
-		boolean l1readHit = hitOrMiss(address, processor, n1, a1, b, 0, "l1");
+		boolean l1readHit = hitOrMiss(address, processor, n1, a1, b, "l1");
 		if (l1readHit) {
 			System.out.println(coreid + ": L1 read hit");
 		} else {
@@ -574,30 +574,34 @@ public class Simulator {
 	}
 
 	// TODO I change the method name to hit or miss
-	Boolean hitOrMiss(String add, Processor pro, int n, int a, int b, int l2index, String l) {
-		boolean hit = false;
-		int setindexbit = n - a - b - l2index;
-		int assobit = a;
-		String setloc = add.substring(32 - setindexbit - 12, 20 - l2index);
-		String assoloc = add.substring(32 - setindexbit - assobit - 12, 32 - setindexbit - 12);
-		Block cached = new Block();
-		if (l == "l1") {
-			cached = pro.l1.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(Integer.parseInt(assoloc, 2));
-		} else if (l == "l2") {
-			String l2id = add.substring(19 - l2index + 1, 20);
-			Processor home = (Processor) processorsTable.get(l2id);
-			cached = home.l2.setsList.get(Integer.parseInt(setloc, 2)).blockList.get(Integer.parseInt(assoloc, 2));
+	Boolean hitOrMiss(String add, Processor pro, int n, int a, int b, String l) {
+        // 0.......31-n+a|31-n+a+1.......31-b|31-b+1..........31
+        // |-------------|-------------------|-----------------|
+        // |TAG          |SET INDEX          |OFFSET           |
+        // |-------------|-------------------|-----------------|
+        // 31.........n-a|n-a-1.............b|b-1..............0
+
+        String setloc = add.substring(32-n+a+1, 31-b+1);
+        String blocktag = add.substring(0,31-n+a);
+
+		if (l.equals("l1")) {
+            Set l1set = pro.l1.setsList.get(Integer.parseInt(setloc,2));
+            // a should be equal to l1set.blockList.size()
+            for (int i=0; i<l1set.blockList.size(); i++){
+                if(blocktag.equals(l1set.blockList.get(i).tag)){
+                    return true;
+                }
+            }
+		} else if (l.equals("l2")) {
+            Set l2set = pro.l2.setsList.get(Integer.parseInt(setloc, 2));
+            for (int i=0; i<l2set.blockList.size(); i++){
+                if(blocktag.equals(l2set.blockList.get(i).tag)){
+                    return true;
+                }
+            }
 		}
 
-		if (cached.tag == add.substring(0, 32 - setindexbit - assobit - 12 + 1)) {
-			if (cached.data == 0) {
-				// no cache, a read-miss
-			} else {
-				hit = true;
-			}
-		}
-
-		return hit;
+		return false;
 	}
 
 	String hexToBinary(String hex) {
@@ -612,7 +616,7 @@ public class Simulator {
 		// Issue a read operation
 		Processor processor = (Processor) processorsTable.get(coreid);
 		int l2indexbit = (int) (Math.log(p) / Math.log(2));
-		boolean l1writeHit = hitOrMiss(address, processor, n1, a1, b, 0, "l1");
+		boolean l1writeHit = hitOrMiss(address, processor, n1, a1, b, "l1");
 		if (l1writeHit) {
 			// the block's state is shared or exclusive in local cache
 			int blockStatus = getBlockStatus(); // get block status
