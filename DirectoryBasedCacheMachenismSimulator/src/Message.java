@@ -12,6 +12,7 @@ public class Message {
 	ArrayList<String> sharers = new ArrayList<String>();
 	int blockStatus;
 	boolean hit;
+	String tag;
 	
 	final static String READ_MISS = "readmiss";
 	final static String MISS_L1 = "missl1";

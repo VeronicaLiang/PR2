@@ -82,6 +82,8 @@ public class Simulator {
 		Hashtable<String, ArrayList> commands = initializeUnits(inputFile);
 		int clockcycle = 1;
 		boolean finish = false;
+		ArrayList<TraceItem> waitingList = new ArrayList<TraceItem>();
+		Hashtable<String, Integer> runningList = new Hashtable<String, Integer>();
 		while (!finish) {
 			// execute all the commands in the message queue
 			if (messageQueue.containsKey(clockcycle)) {
@@ -109,6 +111,7 @@ public class Simulator {
 								message.localNode = msg.localNode;
 								message.remoteNode = processor.l2.directory.blocktable.get(address).owner;
 								message.blockStatus = msg.blockStatus;
+								message.tag = msg.tag;
 								int manhattanDistance = getManhattanDistance(coreid, msg.localNode, p);
 								int executeCycle = clockcycle + manhattanDistance * C;
 								if (messageQueue.containsKey(executeCycle)) {
@@ -136,6 +139,7 @@ public class Simulator {
 								message.localNode = msg.localNode;
 								message.remoteNode = msg.remoteNode;
 								message.blockStatus = msg.blockStatus;
+								message.tag = msg.tag;
 								int manhattanDistance = getManhattanDistance(coreid, msg.localNode, p);
 								int executeCycle = clockcycle + manhattanDistance * C + d;
 								if (messageQueue.containsKey(executeCycle)) {
@@ -159,6 +163,7 @@ public class Simulator {
 							message.dataAddress = address;
 							message.localNode = msg.localNode;
 							message.blockStatus = msg.blockStatus;
+							message.tag = msg.tag;
 							int manhattanDistance = getManhattanDistance(msg.homeNode, "0", p);
 							int executeCycle = clockcycle + manhattanDistance * C;
 							if (messageQueue.containsKey(executeCycle)) {
@@ -181,6 +186,7 @@ public class Simulator {
 						message.dataAddress = address;
 						message.localNode = msg.localNode;
 						message.blockStatus = msg.blockStatus;
+						message.tag = msg.tag;
 						int manhattanDistance = getManhattanDistance(msg.homeNode, "0", p);
 						int executeCycle = clockcycle + manhattanDistance * C + d1;
 						if (messageQueue.containsKey(executeCycle)) {
@@ -206,6 +212,7 @@ public class Simulator {
 						message.localNode = msg.localNode;
 						message.remoteNode = msg.remoteNode;
 						message.blockStatus = msg.blockStatus;
+						message.tag = msg.tag;
 						int manhattanDistance = getManhattanDistance(msg.homeNode, msg.localNode, p);
 						int executeCycle = clockcycle + manhattanDistance * C;
 						if (messageQueue.containsKey(executeCycle)) {
@@ -259,6 +266,7 @@ public class Simulator {
 						message.localNode = msg.localNode;
 						message.remoteNode = msg.remoteNode;
 						message.blockStatus = msg.blockStatus;
+						message.tag = msg.tag;
 						int manhattanDistance = getManhattanDistance(msg.localNode, msg.remoteNode, p);
 						int executeCycle = clockcycle + manhattanDistance * C;
 						if (messageQueue.containsKey(executeCycle)) {
@@ -282,6 +290,7 @@ public class Simulator {
 						message.localNode = msg.localNode;
 						message.remoteNode = msg.remoteNode;
 						message.blockStatus = msg.blockStatus;
+						message.tag = msg.tag;
 						int manhattanDistance = getManhattanDistance(msg.localNode, msg.remoteNode, p);
 						int executeCycle = clockcycle + manhattanDistance * C;
 						if (messageQueue.containsKey(executeCycle)) {
@@ -315,6 +324,7 @@ public class Simulator {
 						message1.localNode = msg.homeNode;
 						message1.remoteNode = msg.remoteNode;
 						message1.blockStatus = msg.blockStatus;
+						message1.tag = msg.tag;
 						int manhattanDistance1 = getManhattanDistance(msg.homeNode, msg.remoteNode, p);
 						int executeCycle1 = clockcycle + manhattanDistance1 * C;
 						if (messageQueue.containsKey(executeCycle1)) {
@@ -330,6 +340,8 @@ public class Simulator {
 						String coreid = msg.homeNode;
 						Processor processor = (Processor) processorsTable.get(coreid);
 						processor.l2.directory.blocktable.get(address).state = msg.blockStatus;
+						// change runninglist item to finish
+						runningList.put(msg.tag, clockcycle);
 						if (msg.blockStatus == Directory.SHARED_STATE) {
 							storeBlockToCache();
 							System.out.println(coreid + ": Set state of block to shared in directory.");
@@ -354,6 +366,7 @@ public class Simulator {
 						message.dataAddress = address;
 						message.localNode = msg.localNode;
 						message.blockStatus = msg.blockStatus;
+						message.tag = msg.tag;
 						message.sharers = processor.l2.directory.blocktable.get(address).sharers;
 
 						int manhattanDistance = getManhattanDistance(msg.homeNode, msg.localNode, p);
@@ -384,13 +397,14 @@ public class Simulator {
 
 						// send invalidating messages to each sharers.
 						for (int n = 0; n < msg.sharers.size(); n++) {
-							if (!msg.sharers.get(n).equals(msg.localNode)){
+							if (!msg.sharers.get(n).equals(msg.localNode)) {
 								Message message1 = new Message();
 								message1.homeNode = msg.homeNode;
 								message1.messageType = Message.INVALIDATE_NOTE;
 								message1.dataAddress = address;
 								message1.localNode = msg.localNode;
 								message1.remoteNode = msg.sharers.get(n);
+								message1.tag = msg.tag;
 								int manhattanDistance = getManhattanDistance(msg.remoteNode, msg.localNode, p);
 								int executeCycle = clockcycle + manhattanDistance * C;
 								if (messageQueue.containsKey(executeCycle)) {
@@ -401,7 +415,7 @@ public class Simulator {
 									messageQueue.put(executeCycle, al);
 								}
 							}
-							
+
 						}
 
 						setBlockStatus(msg.blockStatus); // set local block
@@ -415,6 +429,8 @@ public class Simulator {
 						String coreid = msg.remoteNode;
 						setBlockStatus(msg.blockStatus); // set local block
 															// status to invalid
+						// change runninglist
+						runningList.put(msg.tag, clockcycle);
 						System.out.println(coreid + ": Set state of block to invalid.");
 					}
 				}
@@ -425,18 +441,48 @@ public class Simulator {
 			instructions = commands.get(String.valueOf(clockcycle));
 			for (int i = 0; i < instructions.size(); i++) {
 				TraceItem cur = (TraceItem) instructions.get(i);
-				Processor processor = (Processor) processorsTable.get(cur.coreid);
-				String address = cur.address;
-				if (cur.operationFlag == 0) {
-					// Issue a read operation
-					// readOperation(String cacheLevel, String coreid, String
-					// address, int currentclockcycle)
-					readOperation(cur.coreid, address, clockcycle);
-				} else if (cur.operationFlag == 1) {
-					// Issue a write operation
-					writeOperation("L1", cur.coreid, address, clockcycle);
+				if (cur.consecutive) {
+					// if this trace is consecutive, then add to waiting list
+					waitingList.add(cur);
+				} else {
+					Processor processor = (Processor) processorsTable.get(cur.coreid);
+					String address = cur.address;
+					runningList.put(cur.tag, 0);
+					if (cur.operationFlag == 0) {
+						// Issue a read operation
+						// readOperation(String cacheLevel, String coreid, String
+						// address, int currentclockcycle)
+						readOperation(cur.coreid, address, clockcycle, cur.tag);
+					} else if (cur.operationFlag == 1) {
+						// Issue a write operation
+						writeOperation("L1", cur.coreid, address, clockcycle, cur.tag);
+					}
 				}
 			}
+			for (int i = 0; i < waitingList.size(); i++) {
+				TraceItem cur = waitingList.get(i);
+				if (runningList.get(cur.previous) > 0 && !cur.issued) {
+					if (cur.error > 0) {
+						cur.error = cur.error - 1;
+					} else {
+						cur.issued = true;
+						Processor processor = (Processor) processorsTable.get(cur.coreid);
+						String address = cur.address;
+						runningList.put(cur.tag, 0);
+						if (cur.operationFlag == 0) {
+							// Issue a read operation
+							// readOperation(String cacheLevel, String coreid, String
+							// address, int currentclockcycle)
+							readOperation(cur.coreid, address, clockcycle, cur.tag);
+						} else if (cur.operationFlag == 1) {
+							// Issue a write operation
+							writeOperation("L1", cur.coreid, address, clockcycle, cur.tag);
+						}
+					}
+					
+				}
+			}
+			
 			clockcycle++;
 			// TODO need to check when all operations are finished then set up
 			// the finish flag = true
@@ -502,6 +548,7 @@ public class Simulator {
 		try {
 			FileReader filereader = new FileReader(inputFile);
 			BufferedReader bufferedreader = new BufferedReader(filereader);
+			int counter = 0;
 			while ((line = bufferedreader.readLine()) != null) {
 				String[] ss = line.split(" ");
 				TraceItem item = new TraceItem();
@@ -509,6 +556,8 @@ public class Simulator {
 				item.coreid = ss[1];
 				item.operationFlag = Integer.parseInt(ss[2]);
 				item.address = hexToBinary(ss[3].substring(2));
+				item.tag = counter+"";
+				counter++;
 				boolean ccexist = commands.containsKey(ss[0]);
 				if (ccexist) {
 					commands.get(ss[0]).add(item);
@@ -524,13 +573,31 @@ public class Simulator {
 				System.out.println("read trace file line->" + "  cycle-" + item.cycle + "  coreid-" + item.coreid
 						+ "  operationFlag-" + item.operationFlag + "  address-" + item.address);
 			}
+
+			// check if any operations are consecutive
+			Hashtable<String, TraceItem> htlast = new Hashtable<String, TraceItem>();
+			Hashtable<String, TraceItem> htnow = new Hashtable<String, TraceItem>();
+			for (int i = 0; i < commands.size(); i++) {
+				ArrayList<TraceItem> items = commands.get(i);
+				htnow = new Hashtable<String, TraceItem>();
+				for (int j = 0; j < items.size(); j++) {
+					htnow.put(items.get(j).coreid, items.get(j));
+					if (htlast.containsKey(items.get(j).coreid)) {
+						items.get(j).consecutive = true;
+						items.get(j).previous = htlast.get(items.get(j).coreid).tag;
+						items.get(j).error = items.get(j).cycle - htlast.get(items.get(j).coreid).cycle;
+					}
+				}
+				htlast = (Hashtable<String, TraceItem>) htnow.clone();
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return commands;
 	}
 
-	void readOperation(String coreid, String address, int currentclockcycle) {
+	void readOperation(String coreid, String address, int currentclockcycle, String tag) {
 		// Issue a read operation
 		Processor processor = (Processor) processorsTable.get(coreid);
 		int l2indexbit = (int) (Math.log(p) / Math.log(2));
@@ -546,6 +613,7 @@ public class Simulator {
 			message.dataAddress = address;
 			message.localNode = coreid;
 			message.blockStatus = Directory.SHARED_STATE;
+			message.tag = tag;
 			int manhattanDistance = getManhattanDistance(coreid, homecoreid, p);
 			int executeCycle = manhattanDistance * C + currentclockcycle;
 			if (messageQueue.containsKey(executeCycle)) {
@@ -560,15 +628,15 @@ public class Simulator {
 		}
 	}
 
-    // TODO check whether this calculation is correct
+	// TODO check whether this calculation is correct
 	int getManhattanDistance(String coreid, String homecoreid, int p) {
-		int edge = (int) Math.pow(2, p/2);
-        int core_x = Integer.parseInt(coreid)/edge;
-        int core_y = Integer.parseInt(coreid)%edge;
-        int home_x = Integer.parseInt(homecoreid)/edge;
-        int home_y = Integer.parseInt(homecoreid)%edge;
+		int edge = (int) Math.pow(2, p / 2);
+		int core_x = Integer.parseInt(coreid) / edge;
+		int core_y = Integer.parseInt(coreid) % edge;
+		int home_x = Integer.parseInt(homecoreid) / edge;
+		int home_y = Integer.parseInt(homecoreid) % edge;
 
-        int dist = Math.abs(core_x - core_y) + Math.abs(home_x - home_y);
+		int dist = Math.abs(core_x - core_y) + Math.abs(home_x - home_y);
 
 		return dist;
 	}
@@ -612,7 +680,7 @@ public class Simulator {
 		return zero_pad + value;
 	}
 
-	void writeOperation(String cacheLevel, String coreid, String address, int currentclockcycle) {
+	void writeOperation(String cacheLevel, String coreid, String address, int currentclockcycle, String tag) {
 		// Issue a read operation
 		Processor processor = (Processor) processorsTable.get(coreid);
 		int l2indexbit = (int) (Math.log(p) / Math.log(2));
@@ -633,6 +701,7 @@ public class Simulator {
 				message.localNode = coreid;
 				message.blockStatus = Directory.MODIFIED_STATE;
 				message.hit = true;
+				message.tag = tag;
 				int manhattanDistance = getManhattanDistance(coreid, homecoreid, p);
 				int executeCycle = manhattanDistance * C + currentclockcycle;
 				if (messageQueue.containsKey(executeCycle)) {
@@ -658,6 +727,7 @@ public class Simulator {
 			message.localNode = coreid;
 			message.blockStatus = Directory.MODIFIED_STATE;
 			message.hit = false;
+			message.tag = tag;
 			int manhattanDistance = getManhattanDistance(coreid, homecoreid, p);
 			int executeCycle = manhattanDistance * C + currentclockcycle;
 			if (messageQueue.containsKey(executeCycle)) {
