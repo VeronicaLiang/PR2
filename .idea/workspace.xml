@@ -25,16 +25,24 @@
       <file leaf-file-name="Simulator.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/Simulator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.7238422">
-              <caret line="93" column="66" selection-start-line="93" selection-start-column="66" selection-end-line="93" selection-end-column="66" />
+            <state vertical-scroll-proportion="0.4">
+              <caret line="466" column="17" selection-start-line="466" selection-start-column="17" selection-end-line="466" selection-end-column="17" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="method#initializeUnits#0;class#Simulator#0" expanded="false" />
-                <element signature="method#getManhattanDistance#0;class#Simulator#0" expanded="false" />
-                <element signature="method#hitOrMiss#0;class#Simulator#0" expanded="false" />
-                <element signature="e#23031#23087#0" expanded="false" />
-                <element signature="method#hexToBinary#0;class#Simulator#0" expanded="false" />
-                <element signature="e#26560#26569#0" expanded="true" />
+                <element signature="e#3787#3796#0" expanded="true" />
+                <element signature="e#5006#5015#0" expanded="true" />
+                <element signature="e#6070#6079#0" expanded="true" />
+                <element signature="e#7055#7064#0" expanded="true" />
+                <element signature="e#8143#8152#0" expanded="true" />
+                <element signature="e#10652#10661#0" expanded="true" />
+                <element signature="e#11763#11772#0" expanded="true" />
+                <element signature="e#13165#13174#0" expanded="true" />
+                <element signature="e#15159#15168#0" expanded="true" />
+                <element signature="e#16595#16604#0" expanded="true" />
+                <element signature="e#20888#20907#0" expanded="true" />
+                <element signature="e#23026#23035#0" expanded="true" />
+                <element signature="method#writeOperation#0;class#Simulator#0" expanded="false" />
+                <element signature="e#26824#26833#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -44,8 +52,22 @@
         <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/Directory.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="6" column="13" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
-              <folding />
+              <caret line="11" column="36" selection-start-line="11" selection-start-column="21" selection-end-line="11" selection-end-column="36" />
+              <folding>
+                <element signature="e#304#328#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="OwnerAndSharers.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/OwnerAndSharers.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="20" column="49" selection-start-line="20" selection-start-column="49" selection-end-line="20" selection-end-column="49" />
+              <folding>
+                <element signature="e#386#394#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -74,17 +96,7 @@
         <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/Block.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Processor.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/Processor.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="11" column="35" selection-start-line="11" selection-start-column="20" selection-end-line="11" selection-end-column="35" />
+              <caret line="12" column="14" selection-start-line="12" selection-start-column="14" selection-end-line="12" selection-end-column="14" />
               <folding />
             </state>
           </provider>
@@ -124,10 +136,10 @@
     <order />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="55" />
-    <option name="y" value="3" />
-    <option name="width" value="1318" />
-    <option name="height" value="772" />
+    <option name="x" value="54" />
+    <option name="y" value="-8" />
+    <option name="width" value="1320" />
+    <option name="height" value="784" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -152,9 +164,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="Scratches" />
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -189,6 +198,9 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -386,7 +398,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="55" y="3" width="1318" height="772" extended-state="0" />
+    <frame x="54" y="-8" width="1320" height="784" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -398,7 +410,7 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25119236" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25079367" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -439,13 +451,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/MemoryBlock.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/Memory.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -466,12 +471,20 @@
           <caret line="210" column="0" selection-start-line="210" selection-start-column="0" selection-end-line="210" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="method#initializeUnits#0;class#Simulator#0" expanded="false" />
-            <element signature="method#getManhattanDistance#0;class#Simulator#0" expanded="false" />
-            <element signature="method#hitOrMiss#0;class#Simulator#0" expanded="false" />
-            <element signature="e#23031#23087#0" expanded="false" />
-            <element signature="method#hexToBinary#0;class#Simulator#0" expanded="false" />
-            <element signature="e#26560#26569#0" expanded="true" />
+            <element signature="e#3787#3796#0" expanded="true" />
+            <element signature="e#5006#5015#0" expanded="true" />
+            <element signature="e#6070#6079#0" expanded="true" />
+            <element signature="e#7055#7064#0" expanded="true" />
+            <element signature="e#8143#8152#0" expanded="true" />
+            <element signature="e#10652#10661#0" expanded="true" />
+            <element signature="e#11763#11772#0" expanded="true" />
+            <element signature="e#13165#13174#0" expanded="true" />
+            <element signature="e#15159#15168#0" expanded="true" />
+            <element signature="e#16595#16604#0" expanded="true" />
+            <element signature="e#20888#20907#0" expanded="true" />
+            <element signature="e#23026#23035#0" expanded="true" />
+            <element signature="method#writeOperation#0;class#Simulator#0" expanded="false" />
+            <element signature="e#26824#26833#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -543,12 +556,20 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="method#initializeUnits#0;class#Simulator#0" expanded="false" />
-            <element signature="method#getManhattanDistance#0;class#Simulator#0" expanded="false" />
-            <element signature="method#hitOrMiss#0;class#Simulator#0" expanded="false" />
-            <element signature="e#23031#23087#0" expanded="false" />
-            <element signature="method#hexToBinary#0;class#Simulator#0" expanded="false" />
-            <element signature="e#26560#26569#0" expanded="true" />
+            <element signature="e#3787#3796#0" expanded="true" />
+            <element signature="e#5006#5015#0" expanded="true" />
+            <element signature="e#6070#6079#0" expanded="true" />
+            <element signature="e#7055#7064#0" expanded="true" />
+            <element signature="e#8143#8152#0" expanded="true" />
+            <element signature="e#10652#10661#0" expanded="true" />
+            <element signature="e#11763#11772#0" expanded="true" />
+            <element signature="e#13165#13174#0" expanded="true" />
+            <element signature="e#15159#15168#0" expanded="true" />
+            <element signature="e#16595#16604#0" expanded="true" />
+            <element signature="e#20888#20907#0" expanded="true" />
+            <element signature="e#23026#23035#0" expanded="true" />
+            <element signature="method#writeOperation#0;class#Simulator#0" expanded="false" />
+            <element signature="e#26824#26833#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -619,12 +640,20 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="method#initializeUnits#0;class#Simulator#0" expanded="false" />
-            <element signature="method#getManhattanDistance#0;class#Simulator#0" expanded="false" />
-            <element signature="method#hitOrMiss#0;class#Simulator#0" expanded="false" />
-            <element signature="e#23031#23087#0" expanded="false" />
-            <element signature="method#hexToBinary#0;class#Simulator#0" expanded="false" />
-            <element signature="e#26560#26569#0" expanded="true" />
+            <element signature="e#3787#3796#0" expanded="true" />
+            <element signature="e#5006#5015#0" expanded="true" />
+            <element signature="e#6070#6079#0" expanded="true" />
+            <element signature="e#7055#7064#0" expanded="true" />
+            <element signature="e#8143#8152#0" expanded="true" />
+            <element signature="e#10652#10661#0" expanded="true" />
+            <element signature="e#11763#11772#0" expanded="true" />
+            <element signature="e#13165#13174#0" expanded="true" />
+            <element signature="e#15159#15168#0" expanded="true" />
+            <element signature="e#16595#16604#0" expanded="true" />
+            <element signature="e#20888#20907#0" expanded="true" />
+            <element signature="e#23026#23035#0" expanded="true" />
+            <element signature="method#writeOperation#0;class#Simulator#0" expanded="false" />
+            <element signature="e#26824#26833#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -665,12 +694,20 @@
           <caret line="98" column="24" selection-start-line="98" selection-start-column="22" selection-end-line="98" selection-end-column="24" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="method#initializeUnits#0;class#Simulator#0" expanded="false" />
-            <element signature="method#getManhattanDistance#0;class#Simulator#0" expanded="false" />
-            <element signature="method#hitOrMiss#0;class#Simulator#0" expanded="false" />
-            <element signature="e#23031#23087#0" expanded="false" />
-            <element signature="method#hexToBinary#0;class#Simulator#0" expanded="false" />
-            <element signature="e#26560#26569#0" expanded="true" />
+            <element signature="e#3787#3796#0" expanded="true" />
+            <element signature="e#5006#5015#0" expanded="true" />
+            <element signature="e#6070#6079#0" expanded="true" />
+            <element signature="e#7055#7064#0" expanded="true" />
+            <element signature="e#8143#8152#0" expanded="true" />
+            <element signature="e#10652#10661#0" expanded="true" />
+            <element signature="e#11763#11772#0" expanded="true" />
+            <element signature="e#13165#13174#0" expanded="true" />
+            <element signature="e#15159#15168#0" expanded="true" />
+            <element signature="e#16595#16604#0" expanded="true" />
+            <element signature="e#20888#20907#0" expanded="true" />
+            <element signature="e#23026#23035#0" expanded="true" />
+            <element signature="method#writeOperation#0;class#Simulator#0" expanded="false" />
+            <element signature="e#26824#26833#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -794,16 +831,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/Message.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="17" column="52" selection-start-line="17" selection-start-column="52" selection-end-line="17" selection-end-column="52" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/Directory.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="13" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+        <state vertical-scroll-proportion="0.31891027">
+          <caret line="17" column="43" selection-start-line="17" selection-start-column="43" selection-end-line="17" selection-end-column="43" />
           <folding />
         </state>
       </provider>
@@ -816,18 +845,28 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/Processor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="11" column="35" selection-start-line="11" selection-start-column="20" selection-end-line="11" selection-end-column="35" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/L1.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="18" column="5" selection-start-line="18" selection-start-column="5" selection-end-line="18" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/OwnerAndSharers.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="20" column="49" selection-start-line="20" selection-start-column="49" selection-end-line="20" selection-end-column="49" />
+          <folding>
+            <element signature="e#386#394#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/Processor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.2724359">
+          <caret line="11" column="35" selection-start-line="11" selection-start-column="20" selection-end-line="11" selection-end-column="35" />
           <folding />
         </state>
       </provider>
@@ -843,23 +882,41 @@
     <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/Block.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <caret line="12" column="14" selection-start-line="12" selection-start-column="14" selection-end-line="12" selection-end-column="14" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/Directory.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="11" column="36" selection-start-line="11" selection-start-column="21" selection-end-line="11" selection-end-column="36" />
+          <folding>
+            <element signature="e#304#328#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/DirectoryBasedCacheMachenismSimulator/src/Simulator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.7238422">
-          <caret line="93" column="66" selection-start-line="93" selection-start-column="66" selection-end-line="93" selection-end-column="66" />
+        <state vertical-scroll-proportion="0.4">
+          <caret line="466" column="17" selection-start-line="466" selection-start-column="17" selection-end-line="466" selection-end-column="17" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="method#initializeUnits#0;class#Simulator#0" expanded="false" />
-            <element signature="method#getManhattanDistance#0;class#Simulator#0" expanded="false" />
-            <element signature="method#hitOrMiss#0;class#Simulator#0" expanded="false" />
-            <element signature="e#23031#23087#0" expanded="false" />
-            <element signature="method#hexToBinary#0;class#Simulator#0" expanded="false" />
-            <element signature="e#26560#26569#0" expanded="true" />
+            <element signature="e#3787#3796#0" expanded="true" />
+            <element signature="e#5006#5015#0" expanded="true" />
+            <element signature="e#6070#6079#0" expanded="true" />
+            <element signature="e#7055#7064#0" expanded="true" />
+            <element signature="e#8143#8152#0" expanded="true" />
+            <element signature="e#10652#10661#0" expanded="true" />
+            <element signature="e#11763#11772#0" expanded="true" />
+            <element signature="e#13165#13174#0" expanded="true" />
+            <element signature="e#15159#15168#0" expanded="true" />
+            <element signature="e#16595#16604#0" expanded="true" />
+            <element signature="e#20888#20907#0" expanded="true" />
+            <element signature="e#23026#23035#0" expanded="true" />
+            <element signature="method#writeOperation#0;class#Simulator#0" expanded="false" />
+            <element signature="e#26824#26833#0" expanded="true" />
           </folding>
         </state>
       </provider>
